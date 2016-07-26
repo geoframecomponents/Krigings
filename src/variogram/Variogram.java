@@ -54,7 +54,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 @Description("Experimental semivariogram algorithm.")
 @Documentation("Experimental semivariogram")
-@Author(name = "Giuseppe Formetta, Francesco Adami, Silvia Franceschi")
+@Author(name = "Giuseppe Formetta, Francesco Adami, Silvia Franceschi & Marialaura Bancheri")
 @Keywords("Experimental semivariogram, Kriging, Hydrology")
 @Label(JGTConstants.STATISTICS)
 @Name("variogram")
@@ -83,7 +83,8 @@ public class Variogram extends JGTModel {
 	@In
 	public String pPath = null;
 
-	@Description("Spatial separation distance up to which point pairs are included in semivariance estimates; as a default, the length of the diagonal of the box spanning the data is divided by three.")
+	@Description("Spatial separation distance up to which point pairs are included in semivariance estimates; "
+			+ "as a default, the length of the diagonal of the box spanning the data is divided by three.")
 	@In
 	public double pCutoff;
 
@@ -103,10 +104,12 @@ public class Variogram extends JGTModel {
 	@Out
 	public double[] outNumPairs = null;
 
-	@Description("Are all equals.")
+	@Description("All are equal.")
 	@Out
 	public boolean outAllEquals = true;
-	@Description("Are all equals.")
+
+
+	@Description("All are different.")
 	@Out
 	public int outAllDiff = 0;
 
@@ -115,8 +118,10 @@ public class Variogram extends JGTModel {
 	public IJGTProgressMonitor pm = new LogProgressMonitor();
 
 	private HortonMessageHandler msg = HortonMessageHandler.getInstance();
-	public boolean areAllEquals = true;
-	public int diversi = 0;
+
+	public boolean areAllEquals;
+
+	public int differents;
 
 	@Execute
 	public void process() throws Exception {
@@ -130,6 +135,7 @@ public class Variogram extends JGTModel {
 		 * counter for the number of station with measured value !=0.
 		 */
 		int n1 = 0;
+
 		/*
 		 * Store the station coordinates and measured data in the array.
 		 */
@@ -152,14 +158,19 @@ public class Variogram extends JGTModel {
 				}
 				Coordinate coordinate = ((Geometry) feature
 						.getDefaultGeometry()).getCentroid().getCoordinate();
+
+
+				// h is the vector with measured data
 				double[] h = inData.get(id);
 				if (h == null || isNovalue(h[0])) {
+
 					/*
-					 * skip data for non existing stations, they are allowed.
+					 * skip data for non existing stations.
 					 * Also skip novalues.
 					 */
 					continue;
 				}
+
 				if (Math.abs(h[0]) >= 0.0) { // TOLL
 					xStationList.add(coordinate.x);
 					yStationList.add(coordinate.y);
@@ -174,22 +185,27 @@ public class Variogram extends JGTModel {
 		}
 
 		int nStaz = xStationList.size();
+
+
 		/*
-		 * The coordinates of the station points plus in last position a place
+		 * The coordinates of the station points plus in the last position a place
 		 * for the coordinate of the point to interpolate.
 		 */
 		double[] xStation = new double[nStaz];
 		double[] yStation = new double[nStaz];
 		double[] zStation = new double[nStaz];
 		double[] hStation = new double[nStaz];
+
 		areAllEquals = true;
-		diversi = 0;
+
+		differents = 0;
 
 		if (nStaz != 0) {
 			xStation[0] = xStationList.get(0);
 			yStation[0] = yStationList.get(0);
 			zStation[0] = zStationList.get(0);
 			hStation[0] = hStationList.get(0);
+
 			double previousValue = hStation[0];
 
 			for (int i = 1; i < nStaz; i++) {
@@ -198,9 +214,11 @@ public class Variogram extends JGTModel {
 				double yTmp = yStationList.get(i);
 				double zTmp = zStationList.get(i);
 				double hTmp = hStationList.get(i);
+
 				boolean doubleStation = ModelsEngine.verifyDoubleStation(
 						xStation, yStation, zStation, hStation, xTmp, yTmp,
 						zTmp, hTmp, i, false, pm);
+
 				if (!doubleStation) {
 					xStation[i] = xTmp;
 					yStation[i] = yTmp;
@@ -211,20 +229,18 @@ public class Variogram extends JGTModel {
 						areAllEquals = false;
 					}
 					if (hStation[i] != previousValue) {
-						diversi += 1;
+						differents += 1;
 					}
 					previousValue = hStation[i];
 				}
 			}
 		}
 
-		// if(areAllEquals==true){
-		// System.out.println("All the measured values are the same");
-		//
-		//
-		// }
-		if (diversi > 2) {
+
+		if (differents > 2) {
+
 			outResult = processAlgorithm(xStation, yStation, hStation, pCutoff);
+
 			if (pPath != null && pPath.length() > 0) {
 				FileWriter Rstatfile = new FileWriter(pPath);
 				PrintWriter errestat = new PrintWriter(Rstatfile);
@@ -236,10 +252,7 @@ public class Variogram extends JGTModel {
 									+ " " + "Moran" + " " + "Geary");
 							break;
 						}
-						// errestat.print(i+" ");
-						// System.out.print(i + " ");
-						// errestat.print(j+" ");
-						// System.out.println(j + " ");
+
 						errestat.print(outResult[i - 1][j] + " ");
 
 					}
@@ -254,7 +267,7 @@ public class Variogram extends JGTModel {
 			System.out.println("Only 1 data >0 or All the data are equal. Variogram is not running");
 		}
 		outAllEquals = areAllEquals;
-		outAllDiff = diversi;
+		outAllDiff = differents;
 
 	}
 
@@ -265,18 +278,16 @@ public class Variogram extends JGTModel {
 		double dDifX, dDifY;
 		double value;
 		double mean = 0;
-		double maxDist = 0;
+		double maxDistance = 0;
 
 		int Cutoff_divide = 15;
 		double Cutoff;
 		int iCount = xcord.length;
-		double d[][] = new double[iCount][iCount];
-		double x_max = xcord[0], y_max = ycoord[0], diagonale;
+		double distanceMatrix[][] = new double[iCount][iCount];
+		double x_max = xcord[0], y_max = ycoord[0], diagonal;
 		double x_min = xcord[0], y_min = ycoord[0];
 		for (int i = 1; i < iCount; i++) {
-			// System.out.println(values[i]);
-			// System.out.println(xcord[i]);
-			// System.out.println(ycoord[i]);
+
 			x_min = Math.min(x_min, xcord[i]);
 			y_min = Math.min(y_min, ycoord[i]);
 			x_max = Math.max(x_max, xcord[i]);
@@ -284,14 +295,16 @@ public class Variogram extends JGTModel {
 
 		}
 
-		diagonale = Math.sqrt((x_max - x_min) * (x_max - x_min)
+		diagonal = Math.sqrt((x_max - x_min) * (x_max - x_min)
 				+ (y_max - y_min) * (y_max - y_min));
 
 		if (Cutoffinput == 0) {
-			Cutoff = diagonale / 3;
+			Cutoff = diagonal / 3;
 		} else
 			Cutoff = Cutoffinput;
-		// System.out.println(Cutoff);
+
+
+		// Compute the distance matrix
 		for (int i = 0; i < iCount; i++) {
 			x1 = xcord[i];
 			y1 = ycoord[i];
@@ -306,142 +319,127 @@ public class Variogram extends JGTModel {
 
 				dDifX = x2 - x1;
 				dDifY = y2 - y1;
-				d[i][j] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); // Teor
-				// Pitagora
 
-				maxDist = Math.max(maxDist, d[i][j]);
+				// Pitagora theorem
+				distanceMatrix[i][j] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); 
+
+				maxDistance = Math.max(maxDistance, distanceMatrix[i][j]);
 
 			}
 		}
 
-		mean /= (double) iCount; // media dei valori di pioggia
-		double[][] risultato = calculate(Cutoff_divide, Cutoff, d, values,
-				mean, maxDist);
+		// compute the mean of the input values
+		mean /= (double) iCount; 
 
-		return risultato;
+		double[][] result = calculate(Cutoff_divide, Cutoff, distanceMatrix, values, mean, maxDistance);
 
-	} // chiusura metodo
+		return result;
 
-	public double[][] calculate(int num, double cutoff,
-			double[][] matricedelledistanze, double[] values, double media,
-			double maxdistanza) {
-		int i, j;
+	} 
+
+	public double[][] calculate(int num, double cutoff, double[][] distanceMatrix, double[] values, double mean,
+			double maxDistance) {
+
 		int iClasses;
 		int iClass;
-		int[] iPointsInClass;
-		double dSemivar;
-		boolean bIsInClass[];
-		double binAmplitude; // definisco binAmplitude
-		double[] dDen;
 
-		binAmplitude = cutoff / num;
-		iClasses = (int) (maxdistanza / binAmplitude + 2); // numero di distanze
-		// e per ogni dist
-		// calcolo la
-		// semivar
-		// System.out.println(binAmplitude);
+		double binAmplitude = cutoff / num;
+
+
+		// number of distance for each bin
+		iClasses = (int) (maxDistance / binAmplitude + 2); 
+
+		// definition of the vectors containing the variance, covariance, semivariance, 
+		// 	number of the points in the specified bin..
 		double[] m_dMoran = new double[iClasses];
+
 		double[] m_dGeary = new double[iClasses];
-		dDen = new double[iClasses]; // vettori che per ogni distanza
-		// conterranno
-		double[] m_dSemivar = new double[iClasses]; // la varianza, covarianza,
-		// semivarianza, numero
-		iPointsInClass = new int[iClasses]; // numero di punti nella classe spec
-		// di dist
-		bIsInClass = new boolean[iClasses];
+
+		double[] dDen = new double[iClasses];
+
+		double[] m_dSemivar = new double[iClasses]; 
+
+		int[] iPointsInClass = new int[iClasses]; 
+
+		boolean bIsInClass[] = new boolean[iClasses];
+
 		double[] m_ddist = new double[iClasses];
 
-		for (i = 0; i < matricedelledistanze.length; i++) {
-			Arrays.fill(bIsInClass, false); // riempio il vettore buleano
-			// bisinclass di false
-			double value1 = values[i]; // valori di pioggia del primo ciclo
 
-			for (j = i + 1; j < matricedelledistanze.length; j++) {
-				if (matricedelledistanze[i][j] > 0
-						&& matricedelledistanze[i][j] < cutoff) {
+		for (int i = 0; i < distanceMatrix.length; i++) {
+			Arrays.fill(bIsInClass, false); 
 
-					iClass = (int) Math.floor((matricedelledistanze[i][j])
-							/ binAmplitude); // ritorna
-					// a
-					// quale
-					// classe
-					// di
-					// distanza
-					// appartiene
-					// quella
-					// in
-					// oggetto
+			// first cycle input values 
+			double value1 = values[i]; 
 
-					iPointsInClass[iClass]++; // conta i numeri di distanze per
-					// ogni tipo di distanze
-					double value2 = values[j]; // val di pioggia del secondo
-					// ciclo
-					dSemivar = Math.pow((value1 - value2), 2.); // calcolo la
-					// semivarianza
-					// semivarianza
-					m_dSemivar[iClass] += dSemivar; // la varianza va a sommare
-					// tutte le varianze della
-					// classe di distanza
-					m_dMoran[iClass] += (value1 - media) * (value2 - media); // somma
-					// delle
-					// covarianze
-					// della
-					// classe
-					// di
-					// distanza
-					m_dGeary[iClass] = m_dSemivar[iClass]; // inserita la
-					// somma delle
-					// semivarianze
-					// della distanza
-					bIsInClass[iClass] = true; // per la dist in questione si
-					// inserisce true
+			for (int j = i + 1; j < distanceMatrix.length; j++) {
+				if (distanceMatrix[i][j] > 0 && distanceMatrix[i][j] < cutoff) {
 
-					m_ddist[iClass] += matricedelledistanze[i][j]; // +
-					// binAmplitude
-					// / 2. /
-					// binAmplitude;
+					// return the class of considered distance 
+					iClass = (int) Math.floor((distanceMatrix[i][j]) / binAmplitude); 
+
+					// counts the number of distances of each class
+					iPointsInClass[iClass]++; 
+
+					// second cycle input values
+					double value2 = values[j]; 
+
+					// compute the numerator of the semivariance 
+					double dSemivar = Math.pow((value1 - value2), 2.); 
+
+					// sum all the semivariances for the considered class
+					m_dSemivar[iClass] += dSemivar; 
+
+					// compute the numerator of the Moran, 
+					// summing all the covariances for the considered class
+					m_dMoran[iClass] += (value1 - mean) * (value2 - mean);
+
+					// compute the numerator of the Geary
+					m_dGeary[iClass] = m_dSemivar[iClass]; 
+
+					// flag the considered class as true since it has been processed 
+					bIsInClass[iClass] = true; 
+
+					m_ddist[iClass] += distanceMatrix[i][j]; 
 
 				}
 			}
 
-			for (j = 0; j < iClasses; j++) {
-				if (bIsInClass[j]) { // se alla dist j stato dato true
-					dDen[j] += Math.pow(value1 - media, 2.); // calcolo la
-					// varianza e
-					// alla dist j
-					// ne sommo e
-					// assegno tutte
+			for (int j = 0; j < iClasses; j++) {
+				if (bIsInClass[j]) { 
+
+					// compute  the sum of all the variances for the class
+					dDen[j] += Math.pow(value1 - mean, 2.); 
 
 				}
 			}
 
 		}
+
 		double[][] result = new double[iClasses][5];
-		int contaNONzero = 0;
-		int[] indicinonzero = new int[iClasses];
+		int countNONzero = 0;	
+		int[] indicesNONzero = new int[iClasses];
+
 		for (int u = 0; u < dDen.length; u++) {
 			if (dDen[u] > 0) {
-				contaNONzero += 1;
-				indicinonzero[contaNONzero - 1] = u;
-
+				countNONzero += 1;
+				indicesNONzero[countNONzero - 1] = u;
 			}
 		}
-		for (i = 0; i < iClasses; i++) {
-			if (dDen[i] != 0) {
-				m_dMoran[i] /= dDen[i]; // divide la somma delle covarianze
-				// della dist i con la somma delle
-				// varianze
-				m_dGeary[i] *= ((iPointsInClass[i] - 1) / (2. * iPointsInClass[i] * dDen[i])); // n-1/2n(var)
-				// n=numero
-				// di
-				// punti
-				// che
-				// hanno
-				// la
-				// dist
-				// i
-				m_dSemivar[i] /= (2. * iPointsInClass[i]); // semivarianza
 
+		for (int i = 0; i < iClasses; i++) {
+			if (dDen[i] != 0) {
+
+				// Compute the Moran for each class
+				m_dMoran[i] /= dDen[i];
+
+				// Compute the Geary for each class
+				m_dGeary[i] *= ((iPointsInClass[i] - 1) / (2. * iPointsInClass[i] * dDen[i])); // n-1/2n(var)
+
+				// Compute the semivariance
+				m_dSemivar[i] /= (2. * iPointsInClass[i]); 
+
+				// Compute the mean distance for each class
 				m_ddist[i] /= iPointsInClass[i];
 
 				result[i][0] = iPointsInClass[i];
@@ -452,23 +450,26 @@ public class Variogram extends JGTModel {
 
 			}
 		}
-		outDist = new double[contaNONzero];
-		outVar = new double[contaNONzero];
-		double results[][] = new double[contaNONzero][5];
+		outDist = new double[countNONzero];
+		outVar = new double[countNONzero];
+		double results[][] = new double[countNONzero][5];
 
-		outNumPairs = new double[contaNONzero];
-		if (areAllEquals == false && diversi > 2) {
+		outNumPairs = new double[countNONzero];
+		if (areAllEquals == false && differents > 2) {
 
-			for (int ii = 0; ii < contaNONzero; ii++) {
+			for (int ii = 0; ii < countNONzero; ii++) {
 
-				results[ii][0] = result[indicinonzero[ii]][0];
-				outNumPairs[ii] = result[indicinonzero[ii]][0];
-				results[ii][1] = result[indicinonzero[ii]][1];
-				outDist[ii] = result[indicinonzero[ii]][1];
-				results[ii][2] = result[indicinonzero[ii]][2];
-				outVar[ii] = result[indicinonzero[ii]][2];
-				results[ii][3] = result[indicinonzero[ii]][3];
-				results[ii][4] = result[indicinonzero[ii]][4];
+				results[ii][0] = result[indicesNONzero[ii]][0];
+				outNumPairs[ii] = result[indicesNONzero[ii]][0];
+
+				results[ii][1] = result[indicesNONzero[ii]][1];
+				outDist[ii] = result[indicesNONzero[ii]][1];
+
+				results[ii][2] = result[indicesNONzero[ii]][2];
+				outVar[ii] = result[indicesNONzero[ii]][2];
+
+				results[ii][3] = result[indicesNONzero[ii]][3];
+				results[ii][4] = result[indicesNONzero[ii]][4];
 			}
 		} else {
 			results = new double[iClasses][5];
@@ -479,10 +480,13 @@ public class Variogram extends JGTModel {
 			for (int ii = 0; ii < iClasses; ii++) {
 				results[ii][0] = JGTConstants.doubleNovalue;
 				outNumPairs[ii] = JGTConstants.doubleNovalue;
+
 				results[ii][1] = JGTConstants.doubleNovalue;
 				outDist[ii] = JGTConstants.doubleNovalue;
+
 				results[ii][2] = JGTConstants.doubleNovalue;
 				outVar[ii] = JGTConstants.doubleNovalue;
+
 				results[ii][3] = JGTConstants.doubleNovalue;
 				results[ii][4] = JGTConstants.doubleNovalue;
 			}
