@@ -23,7 +23,7 @@ import org.jgrasstools.gears.libs.modules.JGTModel;
 
 @Description("Teorethical semivariogram models.")
 @Documentation("vgm.html")
-@Author(name = "Giuseppe Formetta, Adami Francesco", contact = " http://www.ing.unitn.it/dica/hp/?user=rigon")
+@Author(name = "Giuseppe Formetta, Adami Francesco & MArialaura Bancheri", contact = " http://www.ing.unitn.it/dica/hp/?user=rigon")
 @Keywords("Kriging, Hydrology")
 @Label(JGTConstants.STATISTICS)
 @Name("kriging")
@@ -31,45 +31,45 @@ import org.jgrasstools.gears.libs.modules.JGTModel;
 @License("General Public License Version 3 (GPLv3)")
 @SuppressWarnings("nls")
 public class VGM extends JGTModel {
-    
-    @Description("Distances vector.")
-    @In
-    public double[] distance = null;
-    
-    @Description("Sill value.")
-    @In
-    public double sill;
-    
-    @Description("Range value.")
-    @In
-    public double range;
-    
-    @Description("Nugget value.")
-    @In
-    public double nugget;
-    
-    @Description("Model name")
-    @In
-    public String modelname;
-        
-    @Description("Semivariance vector.")
-    @Out
-    public double[] result = null;
-    
-    Model modelVGM;
 
-    @Execute
-    public void process() throws Exception {
-        result = calculateVGM(distance, modelname, sill, range, nugget);
-    }
+	@Description("Distances vector.")
+	@In
+	public double[] distance = null;
+
+	@Description("Sill value.")
+	@In
+	public double sill;
+
+	@Description("Range value.")
+	@In
+	public double range;
+
+	@Description("Nugget value.")
+	@In
+	public double nugget;
+
+	@Description("Model name")
+	@In
+	public String modelname;
+
+	@Description("Semivariance vector.")
+	@Out
+	public double[] result = null;
+
+	Model modelVGM;
+
+	@Execute
+	public void process() throws Exception {
+		result = calculateVGM(distance, modelname, sill, range, nugget);
+	}
 
 
-    public double[] calculateVGM(double[] distance, String model, double sill, double range, double nug) {
+	public double[] calculateVGM(double[] distance, String model, double sill, double range, double nug) {
 
 		modelVGM=SimpleModelFactory.createModel(model,distance, sill, range, nug);
 		double[] result=modelVGM.result();
 
-        return result;
-    }
-   
+		return result;
+	}
+
 }
