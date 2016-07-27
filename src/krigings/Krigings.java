@@ -18,14 +18,12 @@ package krigings;
 
 import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
 
-import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-
 
 import oms3.annotations.Author;
 import oms3.annotations.Description;
@@ -58,6 +56,9 @@ import org.jgrasstools.gears.utils.sorting.QuickSortAlgorithm;
 import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
 import org.opengis.feature.simple.SimpleFeature;
 
+import krigings.Model;
+import krigings.SimpleModelFactory;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -83,6 +84,7 @@ public class Krigings extends JGTModel {
 	@Description("The field of the vector of stations, defining the elevation.")
 	@In
 	public String fStationsZ = null;
+	
 	@Description("The type of theoretical semivariogram: 0 = Gaussian; 1 = Exponential.")
 	@In
 	public String pSemivariogramType = null;
@@ -115,20 +117,6 @@ public class Krigings extends JGTModel {
 	@In
 	public double thresholdCorrelation;
 
-	/**
-	 * Define the mode. It is possible 4 alternatives: <li>mode ==0, the value
-	 * to calculate are in a non-regular grid (the coordinates are stored in a
-	 * {@link FeatureCollection}, pointsToInterpolate. This is a 2-D
-	 * interpolation, so the z coordinates are null. <li>mode ==1, the value to
-	 * calculate are in a non-regular grid (the coordinates are stored in a
-	 * {@link FeatureCollection}, pointsToInterpolate. This is a 3-D
-	 * interpolation.. <li>mode ==2, the value to calculate are in a regular
-	 * grid (the coordinates are stored in a {@link GridCoverage2D},
-	 * gridToInterpolate. This is a 2-D interpolation. <li>mode ==3, the value
-	 * to calculate are in a regular grid (the coordinates are stored in a
-	 * {@link GridCoverage2D}, gridToInterpolate. This is a 3-D interpolation,
-	 * so the grid have to contains a dem.
-	 */
 	@Description("The interpolation mode (0 = interpolate on irregular grid, 1 = interpolate on regular grid).")
 	@In
 	public int pMode = 0;
@@ -167,6 +155,7 @@ public class Krigings extends JGTModel {
 	@Description("The progress monitor.")
 	@In
 	public IJGTProgressMonitor pm = new LogProgressMonitor();
+	
 	@Description("The semivariogram mode: 0=Integral scale; 1=classical semivariogram (sill range nugget).")
 	@In
 	public int defaultVariogramMode = 0;
@@ -225,6 +214,8 @@ public class Krigings extends JGTModel {
 	private static final double TOLL = 1.0d * 10E-8;
 
 	private HortonMessageHandler msg = HortonMessageHandler.getInstance();
+	
+	Model modelVGM;
 
 
 
@@ -283,7 +274,7 @@ public class Krigings extends JGTModel {
 				double[] h = inData.get(id);
 				if (h == null || isNovalue(h[0])) {
 					/*
-					 * skip data for non existing stations, they are allowed.
+					 * skip data for non existing stations.
 					 * Also skip novalues.
 					 */
 					continue;
@@ -382,14 +373,14 @@ public class Krigings extends JGTModel {
 				}
 			}
 		}
+
 		LinkedHashMap<Integer, Coordinate> pointsToInterpolateId2Coordinates = null;
-		// vecchio int numPointToInterpolate = getNumPoint(inInterpolate);
+
 		int numPointToInterpolate = 0;
 
 		/*
 		 * if the isLogarithmic is true then execute the model with log value.
 		 */
-		// vecchio double[] result = new double[numPointToInterpolate];
 
 		if (pMode == 0) {
 			pointsToInterpolateId2Coordinates = getCoordinate(
@@ -399,10 +390,13 @@ public class Krigings extends JGTModel {
 		Set<Integer> pointsToInterpolateIdSet = pointsToInterpolateId2Coordinates
 				.keySet();
 		Iterator<Integer> idIterator = pointsToInterpolateIdSet.iterator();
+
 		int j = 0;
-		// vecchio int[] idArray = new int[inInterpolate.size()];
+
 		int[] idArray = new int[pointsToInterpolateId2Coordinates.size()];
+
 		double[] result = new double[pointsToInterpolateId2Coordinates.size()];
+
 		while (idIterator.hasNext()) {
 			n1 = xStationOK.length - 1;
 			double sum = 0.;
@@ -410,13 +404,16 @@ public class Krigings extends JGTModel {
 			idArray[j] = id;
 			Coordinate coordinate = (Coordinate) pointsToInterpolateId2Coordinates
 					.get(id);
+
+			// coordinate of the first point 
 			xStationOK[n1] = coordinate.x;
 			yStationOK[n1] = coordinate.y;
 			zStationOK[n1] = coordinate.z;
+
 			double[] xStation = xStationOK;
 			double[] yStation = yStationOK;
 			double[] zStation = zStationOK;
-			double[] hStation = hStationOK;
+			double[] hStation = hStationOK;			
 			int[] idStation = idStationOK;
 
 			double[] xStationNeww = new double[n1];
@@ -425,9 +422,8 @@ public class Krigings extends JGTModel {
 			double[] hneww = new double[n1];
 
 			if (inNumCloserStations > 0) {
-				if (inNumCloserStations > nStaz) {
-					inNumCloserStations = nStaz;
-				}
+				if (inNumCloserStations > nStaz) inNumCloserStations = nStaz;
+
 				double[] xStationNew = new double[inNumCloserStations + 1];
 				double[] yStationNew = new double[inNumCloserStations + 1];
 				int[] idStationNew = new int[inNumCloserStations + 1];
@@ -447,9 +443,9 @@ public class Krigings extends JGTModel {
 				double x2, y2;
 				double dDifX, dDifY;
 				int iCount = xStationOK.length;
-				double d[] = new double[iCount];
+				double distanceVector[] = new double[iCount];
 				double pos[] = new double[iCount];
-				double dprev = 0;
+
 				for (int jj = 0; jj < iCount; jj++) {
 
 					x2 = xStationOK[jj];
@@ -457,30 +453,14 @@ public class Krigings extends JGTModel {
 
 					dDifX = xStationOK[n1] - x2;
 					dDifY = yStationOK[n1] - y2;
-					d[jj] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); // Teor
-					pos[jj] = jj;
-					if (jj == 0) {
-						dprev = d[jj];
-					} else {
-						if (d[jj] == dprev) {
-							System.out.println("xStationOK[n1]="
-									+ xStationOK[n1] + "    "
-									+ "yStationOK[n1]=" + yStationOK[n1]);
-							System.out
-									.print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa      "
-											+ id);
-						}
-						dprev = d[jj];
-					}
-
-					// Pitagora
-
+					distanceVector[jj] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); 
+					pos[jj] = jj;					
 				}
 
 				QuickSortAlgorithm t = new QuickSortAlgorithm(pm);
-				t.sort(d, pos);
+				t.sort(distanceVector, pos);
 				n1 = 0;
-				for (int i = 1; i < d.length; i++) {
+				for (int i = 1; i < distanceVector.length; i++) {
 					if (n1 < inNumCloserStations) {
 						if (defaultVariogramMode == 0) {
 							if (doIncludezero) {
@@ -605,7 +585,7 @@ public class Krigings extends JGTModel {
 					int iCount = xStationOK.length;
 					double d[] = new double[iCount];
 					double pos[] = new double[iCount];
-					double dprev = 0;
+
 					for (int jj = 0; jj < iCount; jj++) {
 
 						x2 = xStationOK[jj];
@@ -613,23 +593,8 @@ public class Krigings extends JGTModel {
 
 						dDifX = xStationOK[n1] - x2;
 						dDifY = yStationOK[n1] - y2;
-						d[jj] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); // Teor
+						d[jj] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); 
 						pos[jj] = jj;
-						if (jj == 0) {
-							dprev = d[jj];
-						} else {
-							if (d[jj] == dprev) {
-								System.out.println("xStationOK[n1]="
-										+ xStationOK[n1] + "    "
-										+ "yStationOK[n1]=" + yStationOK[n1]);
-								System.out
-										.print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa      "
-												+ id);
-							}
-							dprev = d[jj];
-						}
-
-						// Pitagora
 
 					}
 
@@ -828,24 +793,23 @@ public class Krigings extends JGTModel {
 					 */
 
 					double h0 = 0.0;
-					
+
 					outDistances = inDistances;
 					outSemivarinces = inSemivarinces;
-			
 
-					double[][] covarianceMatrix = covMatrixCalculating(
-							xStation, yStation, zStation, n1);
-					double[] knownTerm = knownTermsCalculation(xStation,
-							yStation, zStation, n1);
+
+					double[][] covarianceMatrix = covMatrixCalculating(xStation, yStation, zStation, n1);
+					
+					double[] knownTerm = knownTermsCalculation(xStation,yStation, zStation, n1);
 
 					/*
 					 * solve the linear system, where the result is the weight.
 					 */
 					ColumnVector knownTermColumn = new ColumnVector(knownTerm);
-					LinearSystem linearSystem = new LinearSystem(
-							covarianceMatrix);
-					ColumnVector solution = linearSystem.solve(knownTermColumn,
-							true);
+					
+					LinearSystem linearSystem = new LinearSystem(covarianceMatrix);
+					
+					ColumnVector solution = linearSystem.solve(knownTermColumn,true);
 					// Matrix a = new Matrix(covarianceMatrix);
 					// Matrix b = new Matrix(knownTerm, knownTerm.length);
 					// Matrix x = a.solve(b);
@@ -858,7 +822,7 @@ public class Krigings extends JGTModel {
 						sum = sum + moltiplicativeFactor[k];
 
 					}
-					
+
 					if (doLogarithmic) {
 						h0 = Math.exp(h0);
 					}
@@ -868,7 +832,7 @@ public class Krigings extends JGTModel {
 					if (Math.abs(sum - 1) >= TOLL) {
 						throw new ModelsRuntimeException(
 								"Error in the coffeicients calculation", this
-										.getClass().getSimpleName());
+								.getClass().getSimpleName());
 					}
 					pm.worked(1);
 				} else if (n1 == 1 || areAllEquals) {
@@ -909,12 +873,10 @@ public class Krigings extends JGTModel {
 	 */
 	private void verifyInput() {
 		if (inData == null || inStations == null) {
-			throw new NullPointerException(
-					msg.message("kriging.stationproblem"));
+			throw new NullPointerException( msg.message("kriging.stationProblem"));
 		}
 		if (pMode < 0 || pMode > 1) {
-			throw new IllegalArgumentException(
-					msg.message("kriging.defaultMode"));
+			throw new IllegalArgumentException( msg.message("kriging.defaultMode"));
 		}
 		// if (pMode == 0 && (fStationsZ == null || fPointZ == null)) {
 		// pm.errorMessage(msg.message("kriging.noElevation"));
@@ -923,8 +885,7 @@ public class Krigings extends JGTModel {
 		// }
 
 		if (defaultVariogramMode != 0 && defaultVariogramMode != 1) {
-			throw new IllegalArgumentException(
-					msg.message("kriging.variogramMode"));
+			throw new IllegalArgumentException( msg.message("kriging.variogramMode"));
 		}
 		if (defaultVariogramMode == 0) {
 			if (pVariance == 0 || pIntegralscale[0] == 0
@@ -957,26 +918,20 @@ public class Krigings extends JGTModel {
 		}
 
 	}
+	
+	
+	public static double round(double value, int places) {
+		if (places < 0)
+			throw new IllegalArgumentException();
 
-	/**
-	 * Store the result in a HashMap (if the mode is 0 or 1)
-	 * 
-	 * @param result2
-	 *            the result of the model
-	 * @param id
-	 *            the associated id of the calculating points.
-	 * @throws SchemaException
-	 * @throws SchemaException
-	 */
-	private void storeResult(double[] result2, int[] id) throws SchemaException {
-		outData = new HashMap<Integer, double[]>();
-		for (int i = 0; i < result2.length; i++) {
-			outData.put(id[i], new double[] { result2[i] });
-		}
+		long factor = (long) Math.pow(10, places);
+		value = value * factor;
+		long tmp = Math.round(value);
+		return (double) tmp / factor;
 	}
 
-	
-	
+
+
 
 	/**
 	 * Extract the coordinate of a FeatureCollection in a HashMap with an ID as
@@ -985,12 +940,12 @@ public class Krigings extends JGTModel {
 	 * @param nStaz
 	 * @param collection
 	 * @throws Exception
-	 *             if a fiel of elevation isn't the same of the collection
+	 *             if a field of elevation isn't the same of the collection
 	 */
 	private LinkedHashMap<Integer, Coordinate> getCoordinate(int nStaz,
 			SimpleFeatureCollection collection, String idField)
-			throws Exception {
-		LinkedHashMap<Integer, Coordinate> id2CoordinatesMap = new LinkedHashMap<Integer, Coordinate>();
+					throws Exception {
+		LinkedHashMap<Integer, Coordinate> id2CoordinatesMcovarianceMatrix = new LinkedHashMap<Integer, Coordinate>();
 		FeatureIterator<SimpleFeature> iterator = collection.features();
 		Coordinate coordinate = null;
 		try {
@@ -1010,239 +965,129 @@ public class Krigings extends JGTModel {
 					}
 				}
 				coordinate.z = z;
-				id2CoordinatesMap.put(name, coordinate);
+				id2CoordinatesMcovarianceMatrix.put(name, coordinate);
 			}
 		} finally {
 			iterator.close();
 		}
 
-		return id2CoordinatesMap;
+		return id2CoordinatesMcovarianceMatrix;
+	}
+	
+	
+
+
+	/**
+	 * 
+	 * 
+	 * @param x
+	 *            the x coordinates.
+	 * @param y
+	 *            the y coordinates.
+	 * @param z
+	 *            the z coordinates.
+	 * @param n
+	 *            the number of the stations points.
+	 * @return
+	 */
+	private double[][] covMatrixCalculating(double[] x, double[] y, double[] z, int n) {
+		
+		double[][] covarianceMatrix = new double[n + 1][n + 1];
+		
+		if (defaultVariogramMode == 0) {
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i <= j; i++) {
+					double rx = x[i] - x[j];
+					double ry = y[i] - y[j];
+					double rz = 0;
+					if (pMode == 0) {
+						rz = z[i] - z[j];
+					}
+
+					covarianceMatrix[j][i] = variogram(rx, ry, rz);
+					covarianceMatrix[i][j] = variogram(rx, ry, rz);
+
+				}
+			}
+		} else if (defaultVariogramMode == 1) {
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < n; i++) {
+					double rx = x[i] - x[j];
+					double ry = y[i] - y[j];
+					double rz = 0;
+					if (pMode == 0) {
+						rz = z[i] - z[j];
+					}
+
+					covarianceMatrix[j][i] = variogram(pNug, pA, pS, rx, ry, rz);
+					covarianceMatrix[i][j] = variogram(pNug, pA, pS, rx, ry, rz);
+
+				}
+			}
+
+		}
+		for (int i = 0; i < n; i++) {
+			covarianceMatrix[i][n] = 1.0;
+			covarianceMatrix[n][i] = 1.0;
+
+		}
+		covarianceMatrix[n][n] = 0;
+		return covarianceMatrix;
+
 	}
 
 	/**
-	 * The gaussian variogram
 	 * 
-	 * @param c0
-	 *            nugget.
-	 * @param a
-	 *            range.
-	 * @param sill
-	 *            sill.
-	 * @param rx
-	 *            x distance.
-	 * @param ry
-	 *            y distance.
-	 * @param rz
-	 *            z distance.
-	 * @return the variogram value
+	 * @param x
+	 *            the x coordinates.
+	 * @param y
+	 *            the y coordinates.
+	 * @param z
+	 *            the z coordinates.
+	 * @param n
+	 *            the number of the stations points.
+	 * @return
 	 */
-	private double variogram(double c0, double a, double sill, double rx,
-			double ry, double rz) {
+	private double[] knownTermsCalculation(double[] x, double[] y, double[] z,
+			int n) {
+
+		// known terms vector 
+		double[] gamma = new double[n + 1];
+		
+		if (defaultVariogramMode == 0) {
+			for (int i = 0; i < n; i++) {
+				double rx = x[i] - x[n];
+				double ry = y[i] - y[n];
+				double rz = z[i] - z[n];
+				gamma[i] = variogram(rx, ry, rz);
+			}
+		} else if (defaultVariogramMode == 1) {
+			for (int i = 0; i < n; i++) {
+				double rx = x[i] - x[n];
+				double ry = y[i] - y[n];
+				double rz = z[i] - z[n];
+				gamma[i] = variogram(pNug, pA, pS, rx, ry, rz);
+			}
+
+		}
+		gamma[n] = 1.0;
+		return gamma;
+
+	}
+
+
+
+	private double variogram(double nug, double range, double sill, double rx, double ry, double rz) {
 		if (isNovalue(rz)) {
 			rz = 0;
 		}
-		double value = 0;
-
-		double h2 = Math.sqrt(rx * rx + rz * rz + ry * ry);
-		if (pSemivariogramType.equals("gaussian")) {
-			if (h2 > 0) {
-				value = c0 + sill * (1 - Math.exp(-(h2 * h2) / (a * a)));
-			}
-
-			if (h2 == 0) {
-				value = 0;
-			}
-
-		}
-		if (pSemivariogramType.equals("exponential")) {
-			if (h2 == 0) {
-				value = 0;
-			} else {
-				value = c0 + sill * (1.0 - Math.exp(-(h2) / (a)));
-			}
-		}
-		if (pSemivariogramType.equals("spherical")) {
-			double hr = h2 / (a);
-
-			if (h2 == 0) {
-				value = 0;
-
-			} else {
-				if (h2 < a) {
-					value = c0 + (sill) * (1.5 * hr - 0.5 * Math.pow(hr, 3.0));
-				}
-				if (h2 >= a) {
-					value = sill + c0;
-				}
-			}
-			// System.out.println(h2 + "  " + value);
-		}
-		if (pSemivariogramType.equals("pentaspherical")) {
-			double hr = h2 / (a);
-			double h2r2 = hr * hr;
-			if (h2 == 0)
-				value = 0;
-			if (h2 != 0.0)
-				value = c0
-						+ sill
-						* (hr * ((15.0 / 8.0) + h2r2
-								* ((-5.0 / 4.0) + h2r2 * (3.0 / 8.0))));
-			if (h2 >= a)
-				value = sill;
-			// System.out.println(func[i]);
-		}
-		if (pSemivariogramType.equals("linear")) {
-			if (h2 == 0) {
-				value = 0;
-			} else {
-				if (h2 < a) {
-					value = c0 + sill * (h2 / a);
-				} else {
-					value = sill + c0;
-				}
-			}
-			// System.out.println(func[i]);
-		}
-
-		if (pSemivariogramType.equals("circular")) {
-			double hr = h2 / (a);
-			if (h2 == 0) {
-				value = 0;
-			} else {
-				if (h2 < a) {
-					value = c0
-							+ sill
-							* ((2.0 / Math.PI) * (hr * Math.sqrt(1.0 - hr * hr) + Math
-									.asin(hr)));
-				} else {
-					value = sill + c0;
-				}
-			}
-			// System.out.println(func[i]);
-		}
-
-		if (pSemivariogramType.equals("bessel")) {
-			double MIN_BESS = 1.0e-3;
-			double hr = h2 / (a);
-			if (hr > MIN_BESS)
-				value = c0 + sill * (1.0 - hr * bessk1(hr));
-			else {
-				value = 0;
-			}
-		}
-		if (pSemivariogramType.equals("periodic")) {
-			if (h2 == 0) {
-				value = 0.0;
-			} else {
-				value = c0 + sill * (1.0 - Math.cos(2.0 * Math.PI * h2 / (a)));
-
-			}
-		}
-		if (pSemivariogramType.equals("hole")) {
-			if (h2 != 0.0)
-				value = c0 + sill * (1.0 - Math.sin(h2 / (a)) / (h2 / (a)));
-			if (h2 == 0)
-				value = 0;
-			// System.out.println(func[i]);
-		}
-		// if (pSemivariogramType.equals("logaritmic")) {
-		// if (h2 == 0) {
-		// value = 0;
-		// } else {
-		// // if (h2 < a) {
-		// value = c0 + sill * (1-Math.log(h2 / a));
-		// // } else {
-		// // value = c0 + sill;
-		// // }
-		// }
-		//
-		// }
-		if (pSemivariogramType.equals("power")) {
-			if (h2 != 0.0)
-				value = c0 + sill * (Math.pow(h2, a));
-			if (h2 == 0)
-				value = 0;
-		}
-		if (pSemivariogramType.equals("spline")) {
-			if (h2 == 0) {
-				value = 0;
-			} else {
-				if (h2 < a) {
-					value = c0 + sill * (h2 * h2 * Math.log(h2));
-				} else {
-					value = c0 + sill;
-				}
-			}
-		}
+		double h2 = Math.sqrt(rx * rx + rz * rz + ry * ry);			
+		modelVGM=SimpleModelFactory.createModel(pSemivariogramType,h2, sill, range, nug);
+		double value=modelVGM.result();
 
 		return value;
 	}
-
-	static double bessk1(double x)
-	/*
-	 * bessk1 from numerical recipes
-	 */
-	{
-		double y, ans;
-
-		if (x <= 2.0) {
-			y = x * x / 4.0;
-			ans = (Math.log(x / 2.0) * bessi1(x))
-					+ (1.0 / x)
-					* (1.0 + y
-							* (0.15443144 + y
-									* (-0.67278579 + y
-											* (-0.18156897 + y
-													* (-0.1919402e-1 + y
-															* (-0.110404e-2 + y
-																	* (-0.4686e-4)))))));
-		} else {
-			y = 2.0 / x;
-			ans = (Math.exp(-x) / Math.sqrt(x))
-					* (1.25331414 + y
-							* (0.23498619 + y
-									* (-0.3655620e-1 + y
-											* (0.1504268e-1 + y
-													* (-0.780353e-2 + y
-															* (0.325614e-2 + y
-																	* (-0.68245e-3)))))));
-		}
-		return (double) ans;
-	}
-
-	static double bessi1(double x)
-	/*
-	 * bessi1 from numerical recipes
-	 */
-	{
-		double ax, ans;
-		double y;
-
-		if ((ax = Math.abs(x)) < 3.75) {
-			y = x / 3.75;
-			y *= y;
-			ans = ax
-					* (0.5 + y
-							* (0.87890594 + y
-									* (0.51498869 + y
-											* (0.15084934 + y
-													* (0.2658733e-1 + y
-															* (0.301532e-2 + y * 0.32411e-3))))));
-		} else {
-			y = 3.75 / ax;
-			ans = 0.2282967e-1 + y
-					* (-0.2895312e-1 + y * (0.1787654e-1 - y * 0.420059e-2));
-			ans = 0.39894228
-					+ y
-					* (-0.3988024e-1 + y
-							* (-0.362018e-2 + y
-									* (0.163801e-2 + y
-											* (-0.1031555e-1 + y * ans))));
-			ans *= (Math.exp(ax) / Math.sqrt(ax));
-		}
-		return (double) x < 0.0 ? -ans : ans;
-	}
-
+	
 	/**
 	 * 
 	 * @param rx
@@ -1269,110 +1114,20 @@ public class Krigings extends JGTModel {
 	}
 
 	/**
+	 * Store the result in a HashMcovarianceMatrix (if the mode is 0 or 1)
 	 * 
-	 * 
-	 * @param x
-	 *            the x coordinates.
-	 * @param y
-	 *            the y coordinates.
-	 * @param z
-	 *            the z coordinates.
-	 * @param n
-	 *            the number of the stations points.
-	 * @return
+	 * @param result2
+	 *            the result of the model
+	 * @param id
+	 *            the associated id of the calculating points.
+	 * @throws SchemaException
+	 * @throws SchemaException
 	 */
-	private double[][] covMatrixCalculating(double[] x, double[] y, double[] z,
-			int n) {
-		double[][] ap = new double[n + 1][n + 1];
-		if (defaultVariogramMode == 0) {
-			for (int j = 0; j < n; j++) {
-				for (int i = 0; i <= j; i++) {
-					double rx = x[i] - x[j];
-					double ry = y[i] - y[j];
-					double rz = 0;
-					if (pMode == 0) {
-						rz = z[i] - z[j];
-					}
-					double tmp = variogram(rx, ry, rz);
-
-					ap[j][i] = tmp;
-					ap[i][j] = tmp;
-
-				}
-			}
-		} else if (defaultVariogramMode == 1) {
-			for (int j = 0; j < n; j++) {
-				for (int i = 0; i < n; i++) {
-					double rx = x[i] - x[j];
-					double ry = y[i] - y[j];
-					double rz = 0;
-					if (pMode == 0) {
-						rz = z[i] - z[j];
-					}
-					double tmp = variogram(pNug, pA, pS, rx, ry, rz);
-
-					ap[j][i] = tmp;
-					ap[i][j] = tmp;
-
-				}
-			}
-
+	private void storeResult(double[] result2, int[] id) throws SchemaException {
+		outData = new HashMap<Integer, double[]>();
+		for (int i = 0; i < result2.length; i++) {
+			outData.put(id[i], new double[] { result2[i] });
 		}
-		for (int i = 0; i < n; i++) {
-			ap[i][n] = 1.0;
-			ap[n][i] = 1.0;
-
-		}
-		ap[n][n] = 0;
-		return ap;
-
-	}
-
-	/**
-	 * 
-	 * @param x
-	 *            the x coordinates.
-	 * @param y
-	 *            the y coordinates.
-	 * @param z
-	 *            the z coordinates.
-	 * @param n
-	 *            the number of the stations points.
-	 * @return
-	 */
-	private double[] knownTermsCalculation(double[] x, double[] y, double[] z,
-			int n) {
-
-		double[] gamma = new double[n + 1];
-		if (defaultVariogramMode == 0) {
-			for (int i = 0; i < n; i++) {
-				double rx = x[i] - x[n];
-				double ry = y[i] - y[n];
-				double rz = z[i] - z[n];
-				gamma[i] = variogram(rx, ry, rz);
-			}
-		} else if (defaultVariogramMode == 1) {
-			for (int i = 0; i < n; i++) {
-				double rx = x[i] - x[n];
-				double ry = y[i] - y[n];
-				double rz = z[i] - z[n];
-				gamma[i] = variogram(pNug, pA, pS, rx, ry, rz);
-			}
-
-		}
-		gamma[n] = 1.0;
-		return gamma;
-
-	}
-
-	public static double round(double value, int places) {
-		if (places < 0)
-			throw new IllegalArgumentException();
-
-		long factor = (long) Math.pow(10, places);
-		value = value * factor;
-		long tmp = Math.round(value);
-		return (double) tmp / factor;
 	}
 
 }
