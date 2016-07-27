@@ -21,11 +21,11 @@ public class Spline implements Model{
 	public double[] result() {
         double[] result = new double[dist.length];
         for (int i = 0; i < dist.length; i++) {
-            if (dist[i] != 0.0) {
+            if (dist[i] < range) {
                 result[i] = nug + sill * (dist[i] * dist[i] * Math.log(dist[i]));
             }
             if (dist[i] >= range) {
-                result[i] = sill;
+                result[i] = sill+nug;
             }
             //System.out.println(result[i]);
         }

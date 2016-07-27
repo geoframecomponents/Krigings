@@ -28,7 +28,7 @@ public class Circolar implements Model{
             	result[i] = nug + sill * ((2.0 / Math.PI) * (hr * Math.sqrt(1.0 - hr * hr) + Math.asin(hr)));
             }
             if (dist[i] >= range) {
-            	result[i] = sill;
+            	result[i] = sill+nug;
             }
             //System.out.println(func[i]);
 

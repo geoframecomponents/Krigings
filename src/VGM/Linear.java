@@ -26,7 +26,7 @@ public class Linear implements Model{
                 result[i] = nug + sill * (dist[i] / range);
             }
             if (dist[i] >= range) {
-                result[i] = sill;
+                result[i] = sill+nug;
             }
             //System.out.println(func[i]);
         }

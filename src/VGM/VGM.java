@@ -60,11 +60,11 @@ public class VGM extends JGTModel {
 
 	@Execute
 	public void process() throws Exception {
-		result = calculateVGM(distance, modelname, sill, range, nugget);
+		result = calculateVGM(modelname, distance, sill, range, nugget);
 	}
 
 
-	public double[] calculateVGM(double[] distance, String model, double sill, double range, double nug) {
+	public double[] calculateVGM( String model,double[] distance, double sill, double range, double nug) {
 
 		modelVGM=SimpleModelFactory.createModel(model,distance, sill, range, nug);
 		double[] result=modelVGM.result();
