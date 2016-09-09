@@ -2,13 +2,13 @@ package VGM;
 
 public class Circolar implements Model{
 	
-	double [] dist;
+	double dist;
 	double sill;
 	double range;
 	double nug;
 	
 	
-	public Circolar (double[] dist, double sill, double range, double nug){	
+	public Circolar (double dist, double sill, double range, double nug){	
 		this.dist=dist;
 		this.sill=sill;
 		this.range=range;
@@ -18,21 +18,19 @@ public class Circolar implements Model{
 	
 
 	@Override
-	public double[] result() {
-		int length = dist.length;
-        double hr;
-        double[] result = new double[length];
-        for (int i = 0; i < length; i++) {
-            hr = dist[i] / (range);
-            if (dist[i] != 0.0) {
-            	result[i] = nug + sill * ((2.0 / Math.PI) * (hr * Math.sqrt(1.0 - hr * hr) + Math.asin(hr)));
-            }
-            if (dist[i] >= range) {
-            	result[i] = sill+nug;
-            }
-            //System.out.println(func[i]);
+	public double result() {
 
-        }
+        double hr;
+        double  result = 0;
+            hr = dist / range;
+            if (dist!= 0.0) {
+            	result = nug + sill * ((2.0 / Math.PI) * (hr * Math.sqrt(1.0 - hr * hr) + Math.asin(hr)));
+            } else if (dist >= range) {
+            	result  = sill+nug;
+            } else if (dist==0){
+            	result=0;
+            }
+
         return result;
 	}
 

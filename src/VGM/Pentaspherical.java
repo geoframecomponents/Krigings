@@ -2,13 +2,13 @@ package VGM;
 
 public class Pentaspherical implements Model{
 	
-	double [] dist;
+	double dist;
 	double sill;
 	double range;
 	double nug;
 	
 	
-	public Pentaspherical (double[] dist, double sill, double range, double nug){	
+	public Pentaspherical (double dist, double sill, double range, double nug){	
 		this.dist=dist;
 		this.sill=sill;
 		this.range=range;
@@ -18,21 +18,20 @@ public class Pentaspherical implements Model{
 	
 
 	@Override
-	public double[] result() {
-        int length = dist.length;
-        double[] result = new double[length];
+	public double result() {
+    
+        double result = 0;
         double hr = 0, h2r2;
-        for (int i = 0; i < length; i++) {
-            hr = dist[i] / (range);
+            hr = dist / (range);
             h2r2 = hr * hr;
-            if (dist[i] != 0.0) {
-                result[i] = nug + sill * (hr * ((15.0 / 8.0) + h2r2 * ((-5.0 / 4.0) + h2r2 * (3.0 / 8.0))));
+            if (dist != 0.0) {
+                result = nug + sill * (hr * ((15.0 / 8.0) + h2r2 * ((-5.0 / 4.0) + h2r2 * (3.0 / 8.0))));
             }
-            if (dist[i] >= range) {
-                result[i] = sill;
+            if (dist >= range) {
+                result = sill;
             }
             //System.out.println(func[i]);
-        }
+
         return result;
 	}
 

@@ -16,6 +16,7 @@
  */
 package VGM;
 
+
 import oms3.annotations.*;
 
 import org.jgrasstools.gears.libs.modules.JGTConstants;
@@ -23,7 +24,7 @@ import org.jgrasstools.gears.libs.modules.JGTModel;
 
 @Description("Teorethical semivariogram models.")
 @Documentation("vgm.html")
-@Author(name = "Giuseppe Formetta, Adami Francesco & MArialaura Bancheri", contact = " http://www.ing.unitn.it/dica/hp/?user=rigon")
+@Author(name = "Giuseppe Formetta, Adami Francesco & Marialaura Bancheri", contact = " http://www.ing.unitn.it/dica/hp/?user=rigon")
 @Keywords("Kriging, Hydrology")
 @Label(JGTConstants.STATISTICS)
 @Name("kriging")
@@ -34,7 +35,7 @@ public class VGM extends JGTModel {
 
 	@Description("Distances vector.")
 	@In
-	public double[] distance = null;
+	public double distance;
 
 	@Description("Sill value.")
 	@In
@@ -54,7 +55,7 @@ public class VGM extends JGTModel {
 
 	@Description("Semivariance vector.")
 	@Out
-	public double[] result = null;
+	public double result;
 
 	Model modelVGM;
 
@@ -64,10 +65,10 @@ public class VGM extends JGTModel {
 	}
 
 
-	public double[] calculateVGM( String model,double[] distance, double sill, double range, double nug) {
+	public double calculateVGM( String model,double distance, double sill, double range, double nug) {
 
 		modelVGM=SimpleModelFactory.createModel(model,distance, sill, range, nug);
-		double[] result=modelVGM.result();
+		double result=modelVGM.result();
 
 		return result;
 	}
