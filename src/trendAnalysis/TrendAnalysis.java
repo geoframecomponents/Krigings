@@ -66,6 +66,7 @@ import flanagan.analysis.Regression;
 public class TrendAnalysis extends JGTModel {
 
 
+
 	@Description("The vector of the measurement point, containing the position of the stations.")
 	@In
 	public SimpleFeatureCollection inStations = null;
@@ -81,11 +82,10 @@ public class TrendAnalysis extends JGTModel {
 	public String fStationsZ = null;
 
 
-
-
 	@Description("The file with the measured data to be interpolated.")
 	@In
 	public HashMap<Integer, double[]> inData = null;
+
 
 	@Description("The vector of the points in which the data have to be interpolated.")
 	@In
@@ -96,10 +96,10 @@ public class TrendAnalysis extends JGTModel {
 	@In
 	public String fInterpolateid = null;
 
+
 	@Description("The field of the interpolated vector points, defining the elevation.")
 	@In
 	public String fPointZ = null;
-
 
 
 	@Description("The progress monitor.")
@@ -110,7 +110,6 @@ public class TrendAnalysis extends JGTModel {
 	@Description("Include zeros in computations (default is true).")
 	@In
 	public boolean doIncludezero = true;
-
 
 
 	@Description("In the case of kriging with neighbor, maxdist is the maximum distance "
@@ -130,6 +129,7 @@ public class TrendAnalysis extends JGTModel {
 	@Out
 	public boolean doDetrended = true;
 
+	
 	@Description("The threshold on correlation coefficient for the trend in detrendend mode.")
 	@In
 	public double thresholdCorrelation;
@@ -139,18 +139,19 @@ public class TrendAnalysis extends JGTModel {
 	@Out
 	public HashMap<Integer, double[]> outResiduals= null;
 	
+	
 	@Description("The hashmap withe the interpolated results")
 	@Out
 	public HashMap<Integer, double[]> outDetrendedValues= null;
 
 
-
 	private HortonMessageHandler msg = HortonMessageHandler.getInstance();
 
 
-	/** The id of the cosidered station */
+
 	int id;
 
+	
 	@Description("The double value of the trend")
 	@Out
 	double trend;
@@ -544,10 +545,11 @@ public class TrendAnalysis extends JGTModel {
 
 
 	/**
-	 * Store the result in a HashMcovarianceMatrix (if the mode is 0 or 1).
+	 * Store the result in a HashMap
 	 *
-	 * @param result the result
-	 * @param id            the associated id of the calculating points.
+	 * @param hsokres the vector with the residuals
+	 * @param hStation the vector with the values of the stations
+	 * @param id the associated id of the calculating points.
 	 * @throws SchemaException the schema exception
 	 */
 	private void storeResult(double [] hsokres, double [] hStation, int [] id ) throws SchemaException {
