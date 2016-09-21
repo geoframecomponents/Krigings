@@ -40,9 +40,7 @@ import oms3.annotations.Status;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.SchemaException;
-import org.jgrasstools.gears.libs.exceptions.ModelsIllegalargumentException;
 import org.jgrasstools.gears.libs.exceptions.ModelsRuntimeException;
-import org.jgrasstools.gears.libs.modules.JGTConstants;
 import org.jgrasstools.gears.libs.modules.JGTModel;
 import org.jgrasstools.gears.libs.modules.ModelsEngine;
 import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
@@ -53,110 +51,125 @@ import org.jgrasstools.gears.utils.sorting.QuickSortAlgorithm;
 import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
 import org.opengis.feature.simple.SimpleFeature;
 
-import VGM.VGM;
+import theoreticalVariogram.TheoreticalVariogram;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
+import flanagan.analysis.Regression;
+
 @Description("Ordinary kriging algorithm.")
 @Documentation("Kriging.html")
-@Author(name = "Giuseppe Formetta, Daniele Andreis, Silvia Franceschi, Andrea Antonello", contact = "http://www.hydrologis.com,  http://www.ing.unitn.it/dica/hp/?user=rigon")
+@Author(name = "Giuseppe Formetta, Daniele Andreis, Silvia Franceschi, Andrea Antonello & Marialaura Bancheri")
 @Keywords("Kriging, Hydrology")
-@Label(JGTConstants.STATISTICS)
+@Label("")
 @Name("kriging")
-@Status(Status.EXPERIMENTAL)
+@Status()
 @License("General Public License Version 3 (GPLv3)")
 @SuppressWarnings("nls")
 public class Krigings extends JGTModel {
+
 
 	@Description("The vector of the measurement point, containing the position of the stations.")
 	@In
 	public SimpleFeatureCollection inStations = null;
 
+
 	@Description("The field of the vector of stations, defining the id.")
 	@In
 	public String fStationsid = null;
 
+
 	@Description("The field of the vector of stations, defining the elevation.")
 	@In
 	public String fStationsZ = null;
+
 
 	@Description("The type of theoretical semivariogram: exponential, gaussian, spherical, pentaspherical"
 			+ "linear, circular, bessel, periodic, hole, logaritmic, power, spline")
 	@In
 	public String pSemivariogramType = null;
 
+
 	@Description("The file with the measured data to be interpolated.")
 	@In
 	public HashMap<Integer, double[]> inData = null;
+
 
 	@Description("The vector of the points in which the data have to be interpolated.")
 	@In
 	public SimpleFeatureCollection inInterpolate = null;
 
+
 	@Description("The field of the interpolated vector points, defining the id.")
 	@In
 	public String fInterpolateid = null;
+
 
 	@Description("The field of the interpolated vector points, defining the elevation.")
 	@In
 	public String fPointZ = null;
 
 
-	@Description("The semivariogram mode: 0=Integral scale; 1=classical semivariogram (sill range nugget).")
-	@In
-	public int defaultVariogramMode = 0;
-
-	@Description("The integral scale.")
-	@In
-	public double[] pIntegralscale = null;
-
-	@Description("The variance.")
-	@In
-	public double pVariance = 0;
-
-	@Description("Switch for logaritmic run selection.")
-	@In
-	public boolean doLogarithmic = false;
-
 	@Description("The progress monitor.")
 	@In
 	public IJGTProgressMonitor pm = new LogProgressMonitor();
+
 
 	@Description("Include zeros in computations (default is true).")
 	@In
 	public boolean doIncludezero = true;
 
+
 	@Description("The range if the models runs with the gaussian variogram.")
 	@In
-	public double pA;
+	public double range;
+
 
 	@Description("The sill if the models runs with the gaussian variogram.")
 	@In
-	public double pS;
+	public double sill;
+
 
 	@Description("Is the nugget if the models runs with the gaussian variogram.")
 	@In
-	public double pNug;
+	public double nugget;
+
 
 	@Description("In the case of kriging with neighbor, maxdist is the maximum distance "
 			+ "within the algorithm has to consider the stations")
 	@In
 	public double maxdist;
 
+
 	@Description("In the case of kriging with neighbor, inNumCloserStations is the number "
 			+ "of stations the algorithm has to consider")
 	@In
 	public int inNumCloserStations;
+
+	@Description("Switch for detrended mode.")
+	@In
+	public boolean doDetrended;
+	
+	@Description("The trend in the detrended mode")
+	@In
+	double trend;
+
 
 
 	@Description("The hashmap withe the interpolated results")
 	@Out
 	public HashMap<Integer, double[]> outData = null;
 
+
 	private static final double TOLL = 1.0d * 10E-8;
 
+
 	private HortonMessageHandler msg = HortonMessageHandler.getInstance();
+
+
+	/** The id of the cosidered station */
+	int id;
 
 
 
@@ -169,8 +182,8 @@ public class Krigings extends JGTModel {
 	 * <li>For each point to interpolated, evalutate the know term vector (b)
 	 * and solve the system (a x)=b where x is the weight.
 	 * </p>
-	 * 
-	 * @throws SchemaException
+	 *
+	 * @throws Exception the exception
 	 */
 
 	@Execute
@@ -219,50 +232,26 @@ public class Krigings extends JGTModel {
 
 					continue;
 				}
-				if (defaultVariogramMode == 0) {
-					if (doIncludezero) {
-						if (Math.abs(h[0]) >= 0.0) { // TOLL
-							xStationList.add(coordinate.x);
-							yStationList.add(coordinate.y);
-							zStationList.add(z);
-							hStationList.add(h[0]);
-							idStationList.add(id);
-							n1 = n1 + 1;
-						}
-					} else {
-						if (Math.abs(h[0]) > 0.0) { // TOLL
-							xStationList.add(coordinate.x);
-							yStationList.add(coordinate.y);
-							zStationList.add(z);
-							hStationList.add(h[0]);
-							idStationList.add(id);
-
-							n1 = n1 + 1;
-						}
-					}
-				} else if (defaultVariogramMode == 1) {
-					if (doIncludezero) {
-						if (Math.abs(h[0]) >= 0.0) { // TOLL
-							xStationList.add(round(coordinate.x, 3));
-							yStationList.add(round(coordinate.y, 3));
-							zStationList.add(z);
-							hStationList.add(h[0]);
-							idStationList.add(id);
-
-							n1 = n1 + 1;
-						}
-					} else {
-						if (Math.abs(h[0]) > 0.0) { // TOLL
-							xStationList.add(round(coordinate.x, 3));
-							yStationList.add(round(coordinate.y, 3));
-							zStationList.add(z);
-							hStationList.add(h[0]);
-							idStationList.add(id);
-
-							n1 = n1 + 1;
-						}
+				if (doIncludezero) {
+					if (Math.abs(h[0]) >= 0.0) { // TOLL
+						xStationList.add(coordinate.x);
+						yStationList.add(coordinate.y);
+						zStationList.add(z);
+						hStationList.add(h[0]);
+						idStationList.add(id);
+						n1 = n1 + 1;
 					}
 
+				} else {
+					if (Math.abs(h[0]) > 0.0) { // TOLL
+						xStationList.add(coordinate.x);
+						yStationList.add(coordinate.y);
+						zStationList.add(z);
+						hStationList.add(h[0]);
+						idStationList.add(id);
+
+						n1 = n1 + 1;
+					}
 				}
 			}
 		} finally {
@@ -274,31 +263,31 @@ public class Krigings extends JGTModel {
 
 		/*
 		 * Check if the coordinates or the values are the same for all the measurements stations.
-		 * xStationVector has the dimensions of the coordinates of the measurements points 
+		 * xStationInitialSet has the dimensions of the coordinates of the measurements points 
 		 * plus 1 (the station where it is going to interpolate)
 		 */
 
 
-		double[] xStationVector = new double[nStaz + 1];
-		double[] yStationVector = new double[nStaz + 1];
-		double[] zStationVector = new double[nStaz + 1];
-		double[] hStationVector = new double[nStaz + 1];
-		int[] idStationVector = new int[nStaz + 1];
+		double[] xStationInitialSet = new double[nStaz+ 1];
+		double[] yStationInitialSet = new double[nStaz+ 1];
+		double[] zStationInitialSet = new double[nStaz+ 1];
+		double[] hStationInitialSet = new double[nStaz+ 1];
+		int[] idStationInitialSet = new int[nStaz + 1];
 
 		boolean areAllEquals = true;
 		if (nStaz != 0) {
-			xStationVector[0] = xStationList.get(0);
-			yStationVector[0] = yStationList.get(0);
-			zStationVector[0] = zStationList.get(0);
-			hStationVector[0] = hStationList.get(0);
-			idStationVector[0] = idStationList.get(0);
-			double previousValue = hStationVector[0];
+			xStationInitialSet[0] = xStationList.get(0);
+			yStationInitialSet[0] = yStationList.get(0);
+			zStationInitialSet[0] = zStationList.get(0);
+			hStationInitialSet[0] = hStationList.get(0);
+			idStationInitialSet[0] = idStationList.get(0);
+			double previousValue = hStationInitialSet[0];
 
-			/*for each station added to the vector, it checks the coordinate/values and if they are
+			/* for each station added to the vector, it checks the coordinate/values and if they are
 			 * not null or equal, it adds to the list of the availble stations. If the coordinates
-			 * or the values are all different, the flag areAllEquals  becomes false. 
-			 *  
+			 * or the values are all different, the flag areAllEquals  becomes false.   
 			 */
+
 			for (int i = 0; i < nStaz; i++) {
 
 				double xTmp = xStationList.get(i);
@@ -307,20 +296,115 @@ public class Krigings extends JGTModel {
 				double hTmp = hStationList.get(i);
 				int idTmp = idStationList.get(i);
 
-				boolean doubleStation = ModelsEngine.verifyDoubleStation( xStationVector, yStationVector, zStationVector, hStationVector,
-						xTmp,yTmp, zTmp, hTmp, i, false, pm);
+				boolean doubleStation = ModelsEngine.verifyDoubleStation( xStationInitialSet, yStationInitialSet, zStationInitialSet, 
+						hStationInitialSet,xTmp,yTmp, zTmp, hTmp, i, false, pm);
 				if (!doubleStation) {
-					xStationVector[i] = xTmp;
-					yStationVector[i] = yTmp;
-					zStationVector[i] = zTmp;
-					hStationVector[i] = hTmp;
-					idStationVector[i] = idTmp;
-					if (areAllEquals && hStationVector[i] != previousValue) {
+					xStationInitialSet[i] = xTmp;
+					yStationInitialSet[i] = yTmp;
+					zStationInitialSet[i] = zTmp;
+					hStationInitialSet[i] = hTmp;
+					idStationInitialSet[i] = idTmp;
+					if (areAllEquals && hStationInitialSet[i] != previousValue) {
 						areAllEquals = false;
 					}
-					previousValue = hStationVector[i];
+					previousValue = hStationInitialSet[i];
 				}
 			}
+		}
+
+		/* in case of kriging with neighbor computes the distances between the
+		 * point where is going to interpolate and the other stations and it
+		 * sorts them
+		 */ 
+
+		if (inNumCloserStations > 0 || maxdist>0) {
+
+			inNumCloserStations= (inNumCloserStations> nStaz)? nStaz:inNumCloserStations;	
+
+			double x2, y2;
+			double dDifX, dDifY;
+			double distanceVector[] = new double[xStationInitialSet.length];
+			double pos[] = new double[xStationInitialSet.length];
+
+
+			for (int jj = 0; jj < xStationInitialSet.length; jj++) {
+
+				x2 = xStationInitialSet[jj];
+				y2 = yStationInitialSet[jj];
+
+				dDifX = xStationInitialSet[n1] - x2;
+				dDifY = yStationInitialSet[n1] - y2;
+				distanceVector[jj] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); 
+				pos[jj] = jj;					
+			}
+
+			// sorts the distances
+			QuickSortAlgorithm t = new QuickSortAlgorithm(pm);
+			t.sort(distanceVector, pos);
+
+			// posDist is the number of the stations within the distance 
+			int posDist = distanceVector.length;
+			for (int k = 0; k < distanceVector.length; k++) {
+				if (distanceVector[k] > maxdist) {
+					posDist = k;
+					break;
+				}
+			}
+
+			// in case there are no stations within the distance, the algorithm considers
+			// at least the nearest 3
+			posDist=(posDist == 1)?posDist += 3:posDist;
+
+			/*
+			 * The dimension of the new vector of the station is then defined
+			 * by the actual number of the station within the distance or defined 
+			 * by the users
+			 */
+			int dim=(inNumCloserStations > 0)?inNumCloserStations+1:posDist;
+
+
+			double[] xStationWithNeighbour = new double[dim];
+			double[] yStationWithNeighbour = new double[dim];
+			int[] idStationWithNeighbour = new int[dim];
+			double[] zStationWithNeighbour = new double[dim];
+			double[] hWithNeighbour = new double[dim];
+
+
+			// it is necessary to actualize the counter of the stations
+			n1=0;
+
+			for (int i = 1; i < dim; i++) {					
+				if (doIncludezero) {
+					if (Math.abs(hStationInitialSet[(int) pos[i]]) >= 0.0) { // TOLL
+						xStationWithNeighbour[n1] = xStationInitialSet[(int) pos[i]];
+						yStationWithNeighbour[n1] = yStationInitialSet[(int) pos[i]];
+						zStationWithNeighbour[n1] = zStationInitialSet[(int) pos[i]];
+						idStationWithNeighbour[n1] = idStationInitialSet[(int) pos[i]];
+
+						hWithNeighbour[n1] = hStationInitialSet[(int) pos[i]];
+						n1 += 1;
+					}
+				} else {
+					if (Math.abs(hStationInitialSet[(int) pos[i]]) > 0.0) {
+						xStationWithNeighbour[n1] = xStationInitialSet[(int) pos[i]];
+						yStationWithNeighbour[n1] = yStationInitialSet[(int) pos[i]];
+						zStationWithNeighbour[n1] = zStationInitialSet[(int) pos[i]];
+						idStationWithNeighbour[n1] = idStationInitialSet[(int) pos[i]];
+
+						hWithNeighbour[n1] = hStationInitialSet[(int) pos[i]];
+						n1 += 1;
+
+					}
+				}
+
+			}
+
+			xStationInitialSet = xStationWithNeighbour;
+			yStationInitialSet = yStationWithNeighbour;
+			zStationInitialSet = zStationWithNeighbour;
+			idStationInitialSet = idStationWithNeighbour;
+			hStationInitialSet = hWithNeighbour;
+
 		}
 
 		LinkedHashMap<Integer, Coordinate> pointsToInterpolateId2Coordinates = null;
@@ -328,8 +412,7 @@ public class Krigings extends JGTModel {
 		int numPointToInterpolate = 0;
 
 
-		pointsToInterpolateId2Coordinates = getCoordinate(
-				numPointToInterpolate, inInterpolate, fInterpolateid);
+		pointsToInterpolateId2Coordinates = getCoordinate(numPointToInterpolate, inInterpolate, fInterpolateid);
 
 
 		Set<Integer> pointsToInterpolateIdSet = pointsToInterpolateId2Coordinates
@@ -338,139 +421,29 @@ public class Krigings extends JGTModel {
 
 		int j = 0;
 
+		double[] result = new double[pointsToInterpolateId2Coordinates.size()];
 		int[] idArray = new int[pointsToInterpolateId2Coordinates.size()];
 
-		double[] result = new double[pointsToInterpolateId2Coordinates.size()];
-
 		while (idIterator.hasNext()) {
-			n1 = xStationVector.length - 1;
+			n1 = xStationInitialSet.length - 1;
 			double sum = 0.;
-			int id = idIterator.next();
+			id = idIterator.next();
 			idArray[j] = id;
+
 			Coordinate coordinate = (Coordinate) pointsToInterpolateId2Coordinates.get(id);
 
 			// coordinate of the were it is going to interpolate
-			xStationVector[n1] = coordinate.x;
-			yStationVector[n1] = coordinate.y;
-			zStationVector[n1] = coordinate.z;
+			xStationInitialSet[n1] = coordinate.x;
+			yStationInitialSet[n1] = coordinate.y;
+			zStationInitialSet[n1] = coordinate.z;
 
-			double[] xStation = xStationVector;
-			double[] yStation = yStationVector;
-			double[] zStation = zStationVector;
-			double[] hStation = hStationVector;			
-			int[] idStation = idStationVector;
+			double[] xStation = xStationInitialSet;
+			double[] yStation = yStationInitialSet;
+			double[] zStation = zStationInitialSet;
+			double[] hStation = hStationInitialSet;			
 
-
-			// in case of kriging with neighbour computes the distances between the
-			// point where is going to interpolate and the other stations and it
-			// sorts them
-			if (inNumCloserStations > 0 || maxdist>0) {
-
-				inNumCloserStations= (inNumCloserStations> nStaz)? nStaz:inNumCloserStations;	
-
-				double x2, y2;
-				double dDifX, dDifY;
-				int iCount = xStationVector.length;
-				double distanceVector[] = new double[iCount];
-				double pos[] = new double[iCount];
-
-
-				for (int jj = 0; jj < iCount; jj++) {
-
-					x2 = xStationVector[jj];
-					y2 = yStationVector[jj];
-
-					dDifX = xStationVector[n1] - x2;
-					dDifY = yStationVector[n1] - y2;
-					distanceVector[jj] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); 
-					pos[jj] = jj;					
-				}
-
-				// sorts the distances
-				QuickSortAlgorithm t = new QuickSortAlgorithm(pm);
-				t.sort(distanceVector, pos);
-
-				// posDist is the number of the stations within the distance 
-				int posDist = distanceVector.length;
-				for (int k = 0; k < distanceVector.length; k++) {
-					if (distanceVector[k] > maxdist) {
-						posDist = k;
-						break;
-					}
-				}
-
-				// in case there are no stations within the distance, the algorithm considers
-				// at least the nearest 3
-				posDist=(posDist == 1)?posDist += 3:posDist;
-
-				/*
-				 * The dimension of the new vector of the station is then defined
-				 * by the actual number of the station within the distance or defined 
-				 * by the users
-				 */
-				int dim=(inNumCloserStations > 0)?inNumCloserStations+1:posDist;
-
-
-				double[] xStationWithNeighbour = new double[dim];
-				double[] yStationWithNeighbour = new double[dim];
-				int[] idStationWithNeighbour = new int[dim];
-				double[] zStationWithNeighbour = new double[dim];
-				double[] hWithNeighbour = new double[dim];
-
-
-				// it is necessary to actualize the counter of the stations
-				n1=0;
-
-				for (int i = 1; i < dim; i++) {					
-					if (doIncludezero) {
-						if (Math.abs(hStationVector[(int) pos[i]]) >= 0.0) { // TOLL
-							xStationWithNeighbour[n1] = xStationVector[(int) pos[i]];
-							yStationWithNeighbour[n1] = yStationVector[(int) pos[i]];
-							zStationWithNeighbour[n1] = zStationVector[(int) pos[i]];
-							idStationWithNeighbour[n1] = idStationVector[(int) pos[i]];
-
-							hWithNeighbour[n1] = hStationVector[(int) pos[i]];
-							n1 += 1;
-						}
-					} else {
-						if (Math.abs(hStationVector[(int) pos[i]]) > 0.0) {
-							xStationWithNeighbour[n1] = xStationVector[(int) pos[i]];
-							yStationWithNeighbour[n1] = yStationVector[(int) pos[i]];
-							zStationWithNeighbour[n1] = zStationVector[(int) pos[i]];
-							idStationWithNeighbour[n1] = idStationVector[(int) pos[i]];
-
-							hWithNeighbour[n1] = hStationVector[(int) pos[i]];
-							n1 += 1;
-
-						}
-					}
-
-				}
-
-
-				// final stations after the neighbour 
-				yStationWithNeighbour[dim-1] = coordinate.y;
-				xStationWithNeighbour[dim-1] = coordinate.x;
-				zStationWithNeighbour[dim-1] = coordinate.z;
-				idStationWithNeighbour[dim-1] = id;
-				xStation = xStationWithNeighbour;
-				yStation = yStationWithNeighbour;
-				zStation = zStationWithNeighbour;
-				idStation = idStationWithNeighbour;
-				hStation = hWithNeighbour;
-
-			}
 
 			if (n1 != 0) {
-				if (doLogarithmic) {
-					for (int i = 0; i < nStaz; i++) {
-						if (hStation[i] > 0.0) {
-							hStation[i] = Math.log(hStation[i]);
-						}
-					}
-
-				}
-
 
 				if (!areAllEquals && n1 > 1) {
 					pm.beginTask(msg.message("kriging.working"),
@@ -487,7 +460,7 @@ public class Krigings extends JGTModel {
 					double[] knownTerm = knownTermsCalculation(xStation,yStation, zStation, n1);
 
 					/*
-					 * solve the linear system, where the result is the weight.
+					 * solve the linear system, where the result is the weight (moltiplicativeFactor).
 					 */
 					ColumnVector knownTermColumn = new ColumnVector(knownTerm);
 
@@ -497,15 +470,20 @@ public class Krigings extends JGTModel {
 
 					double[] moltiplicativeFactor = solution.copyValues1D();
 
+
 					for (int k = 0; k < n1; k++) {
 						h0 = h0 + moltiplicativeFactor[k] * hStation[k];
+
+						// sum is computed to check that 
+						//the sum of all the weights is 1
 						sum = sum + moltiplicativeFactor[k];
 
 					}
 
-					if (doLogarithmic) {
-						h0 = Math.exp(h0);
-					}
+
+					h0 =(doDetrended)? h0 + trend:h0;
+
+
 					result[j] = h0;
 					j++;
 
@@ -539,9 +517,10 @@ public class Krigings extends JGTModel {
 				j++;
 
 			}
+
 		}
 
-		storeResult(result, idArray);
+		storeResult(result , idArray);
 
 	}
 
@@ -553,38 +532,16 @@ public class Krigings extends JGTModel {
 			throw new NullPointerException( msg.message("kriging.stationProblem"));
 		}
 
-		if (defaultVariogramMode != 0 && defaultVariogramMode != 1) {
-			throw new IllegalArgumentException( msg.message("kriging.variogramMode"));
-		}
-		if (defaultVariogramMode == 0) {
-			if (pVariance == 0 || pIntegralscale[0] == 0
-					|| pIntegralscale[1] == 0 || pIntegralscale[2] == 0) {
-
-				pm.errorMessage(msg.message("kriging.noParam"));
-				pm.errorMessage("varianza " + pVariance);
-				pm.errorMessage("Integral scale x " + pIntegralscale[0]);
-				pm.errorMessage("Integral scale y " + pIntegralscale[1]);
-				pm.errorMessage("Integral scale z " + pIntegralscale[2]);
-			}
-		}
-		if (defaultVariogramMode == 1) {
-			if (pNug == 0 || pS == 0 || pA == 0) {
-				pm.errorMessage(msg.message("kriging.noParam"));
-				pm.errorMessage("Nugget " + pNug);
-				pm.errorMessage("Sill " + pS);
-				pm.errorMessage("Range " + pA);
-			}
-		}
-
-		if (inInterpolate == null) {
-			throw new ModelsIllegalargumentException(
-					msg.message("kriging.noPoint"), this);
-		}
-
-
 	}
 
 
+	/**
+	 * Round.
+	 *
+	 * @param value is the value of the variable considered 
+	 * @param places the places to consider after the comma
+	 * @return the double value of the variable rounded
+	 */
 	public static double round(double value, int places) {
 		if (places < 0)
 			throw new IllegalArgumentException();
@@ -601,11 +558,12 @@ public class Krigings extends JGTModel {
 	/**
 	 * Extract the coordinate of a FeatureCollection in a HashMap with an ID as
 	 * a key.
-	 * 
-	 * @param nStaz
-	 * @param collection
-	 * @throws Exception
-	 *             if a field of elevation isn't the same of the collection
+	 *
+	 * @param nStaz the number of the stations
+	 * @param collection is the collection of the considered points 
+	 * @param idField the field containing the id of the stations 
+	 * @return the coordinate of the station
+	 * @throws Exception if a field of elevation isn't the same of the collection
 	 */
 	private LinkedHashMap<Integer, Coordinate> getCoordinate(int nStaz,
 			SimpleFeatureCollection collection, String idField)
@@ -643,50 +601,32 @@ public class Krigings extends JGTModel {
 
 
 	/**
-	 * 
-	 * 
-	 * @param x
-	 *            the x coordinates.
-	 * @param y
-	 *            the y coordinates.
-	 * @param z
-	 *            the z coordinates.
-	 * @param n
-	 *            the number of the stations points.
-	 * @return
+	 * Covariance matrix calculation.
+	 *
+	 * @param x the x coordinates.
+	 * @param y the y coordinates.
+	 * @param z the z coordinates.
+	 * @param n the number of the stations points.
+	 * @return the double[][] matrix with the covariance
 	 */
 	private double[][] covMatrixCalculating(double[] x, double[] y, double[] z, int n) {
 
 		double[][] covarianceMatrix = new double[n + 1][n + 1];
 
-		if (defaultVariogramMode == 0) {
-			for (int j = 0; j < n; j++) {
-				for (int i = 0; i <= j; i++) {
-					double rx = x[i] - x[j];
-					double ry = y[i] - y[j];
-					double rz = z[i] - z[j];
+		for (int j = 0; j < n; j++) {
+			for (int i = 0; i < n; i++) {
+				double rx = x[i] - x[j];
+				double ry = y[i] - y[j];
+				double rz = z[i] - z[j];
 
 
-					covarianceMatrix[j][i] = variogram(rx, ry, rz);
-					covarianceMatrix[i][j] = variogram(rx, ry, rz);
+				covarianceMatrix[j][i] = variogram(nugget, range, sill, rx, ry, rz);
+				covarianceMatrix[i][j] = variogram(nugget, range, sill, rx, ry, rz);
 
-				}
 			}
-		} else if (defaultVariogramMode == 1) {
-			for (int j = 0; j < n; j++) {
-				for (int i = 0; i < n; i++) {
-					double rx = x[i] - x[j];
-					double ry = y[i] - y[j];
-					double rz = z[i] - z[j];
-
-
-					covarianceMatrix[j][i] = variogram(pNug, pA, pS, rx, ry, rz);
-					covarianceMatrix[i][j] = variogram(pNug, pA, pS, rx, ry, rz);
-
-				}
-			}
-
 		}
+
+
 		for (int i = 0; i < n; i++) {
 			covarianceMatrix[i][n] = 1.0;
 			covarianceMatrix[n][i] = 1.0;
@@ -698,16 +638,13 @@ public class Krigings extends JGTModel {
 	}
 
 	/**
-	 * 
-	 * @param x
-	 *            the x coordinates.
-	 * @param y
-	 *            the y coordinates.
-	 * @param z
-	 *            the z coordinates.
-	 * @param n
-	 *            the number of the stations points.
-	 * @return
+	 * Known terms calculation.
+	 *
+	 * @param x the x coordinates.
+	 * @param y the y coordinates.
+	 * @param z the z coordinates.
+	 * @param n the number of the stations points.
+	 * @return the double[] vector of the known terms
 	 */
 	private double[] knownTermsCalculation(double[] x, double[] y, double[] z,
 			int n) {
@@ -715,22 +652,14 @@ public class Krigings extends JGTModel {
 		// known terms vector 
 		double[] gamma = new double[n + 1];
 
-		if (defaultVariogramMode == 0) {
-			for (int i = 0; i < n; i++) {
-				double rx = x[i] - x[n];
-				double ry = y[i] - y[n];
-				double rz = z[i] - z[n];
-				gamma[i] = variogram(rx, ry, rz);
-			}
-		} else if (defaultVariogramMode == 1) {
-			for (int i = 0; i < n; i++) {
-				double rx = x[i] - x[n];
-				double ry = y[i] - y[n];
-				double rz = z[i] - z[n];
-				gamma[i] = variogram(pNug, pA, pS, rx, ry, rz);
-			}
 
+		for (int i = 0; i < n; i++) {
+			double rx = x[i] - x[n];
+			double ry = y[i] - y[n];
+			double rz = z[i] - z[n];
+			gamma[i] = variogram(nugget, range, sill, rx, ry, rz);
 		}
+
 		gamma[n] = 1.0;
 		return gamma;
 
@@ -738,6 +667,17 @@ public class Krigings extends JGTModel {
 
 
 
+	/**
+	 * Variogram.
+	 *
+	 * @param nug is the nugget
+	 * @param range is the range
+	 * @param sill is the sill
+	 * @param rx is the x distance
+	 * @param ry is the y distance
+	 * @param rz is the z distance
+	 * @return the double value of the variance
+	 */
 	private double variogram(double nug, double range, double sill, double rx, double ry, double rz) {
 		if (isNovalue(rz)) {
 			rz = 0;
@@ -746,7 +686,7 @@ public class Krigings extends JGTModel {
 		double vgmResult;
 
 		if(h2!=0){			
-			VGM vgm=new VGM();
+			TheoreticalVariogram vgm=new TheoreticalVariogram();
 			vgmResult=vgm.calculateVGM(pSemivariogramType,h2, sill, range, nug);
 		}else {
 			vgmResult=0;
@@ -754,45 +694,19 @@ public class Krigings extends JGTModel {
 		return vgmResult;
 	}
 
-	/**
-	 * 
-	 * @param rx
-	 *            x distance.
-	 * @param ry
-	 *            y distance.
-	 * @param rz
-	 *            z distance.
-	 * @return
-	 */
-	private double variogram(double rx, double ry, double rz) {
-		if (isNovalue(rz)) {
-			rz = 0;
-		}
-		double h2 = (rx / pIntegralscale[0]) * (rx / pIntegralscale[0])
-				+ (ry / pIntegralscale[1]) * (ry / pIntegralscale[1])
-				+ (rz / pIntegralscale[2]) * (rz / pIntegralscale[2]);
-		if (h2 < TOLL) {
-			return pVariance;
-		} else {
-			return pVariance * Math.exp(-Math.sqrt(h2));
-		}
 
-	}
 
 	/**
-	 * Store the result in a HashMcovarianceMatrix (if the mode is 0 or 1)
-	 * 
-	 * @param result2
-	 *            the result of the model
-	 * @param id
-	 *            the associated id of the calculating points.
-	 * @throws SchemaException
-	 * @throws SchemaException
+	 * Store the result in a HashMcovarianceMatrix (if the mode is 0 or 1).
+	 *
+	 * @param result the result
+	 * @param id            the associated id of the calculating points.
+	 * @throws SchemaException the schema exception
 	 */
-	private void storeResult(double[] result2, int[] id) throws SchemaException {
+	private void storeResult(double [] result, int [] id) throws SchemaException {
 		outData = new HashMap<Integer, double[]>();
-		for (int i = 0; i < result2.length; i++) {
-			outData.put(id[i], new double[] { result2[i] });
+		for (int i = 0; i < result.length; i++) {
+			outData.put(id[i], new double[] { result[i] });
 		}
 	}
 
