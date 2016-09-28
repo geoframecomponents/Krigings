@@ -56,7 +56,6 @@ import theoreticalVariogram.TheoreticalVariogram;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
-import flanagan.analysis.Regression;
 
 @Description("Ordinary kriging algorithm.")
 @Documentation("Kriging.html")
