@@ -1,16 +1,13 @@
 package krigingsTests;
 
-import java.io.File;
-import java.net.URL;
+
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
+
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
-import org.jgrasstools.hortonmachine.modules.statistics.kriging.OmsVariogram;
 import org.jgrasstools.hortonmachine.utils.HMTestCase;
 
 import experimentalVariogram.ExperimentalVariogram;

@@ -1,20 +1,15 @@
 package krigingsTests;
 
-import java.io.File;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
 
-import org.geotools.data.simple.SimpleFeatureCollection;
-import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
+import java.util.HashMap;
+
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
-import org.jgrasstools.hortonmachine.modules.statistics.kriging.OmsVariogram;
+
 import org.jgrasstools.hortonmachine.utils.HMTestCase;
 
 import theoreticalVariogram.TheoreticalVariogram;
-import experimentalVariogram.ExperimentalVariogram;
+
 
 public class TestTheoreticalVariogram extends HMTestCase {
 	@SuppressWarnings("nls")
@@ -29,8 +24,18 @@ public class TestTheoreticalVariogram extends HMTestCase {
 		reader.tTimestep = 60;
 		// reader.tEnd = "2000-01-01 00:00";
 		reader.fileNovalue = "-9999";
+		
+		
+		OmsTimeSeriesIteratorReader readerV = new OmsTimeSeriesIteratorReader();
+		readerV.file ="resources/Input/theoreticalVGM/experimental_variogram.csv";
+		readerV.idfield = "ID";
+		readerV.tStart = "2000-01-01 00:00";
+		readerV.tTimestep = 60;
+		// reader.tEnd = "2000-01-01 00:00";
+		readerV.fileNovalue = "-9999";
 
 		reader.initProcess();
+		readerV.initProcess();
 
 		TheoreticalVariogram Meuse = new TheoreticalVariogram();
 		Meuse.pm = pm;
@@ -51,6 +56,10 @@ public class TestTheoreticalVariogram extends HMTestCase {
 			reader.nextRecord();
 			HashMap<Integer, double[]> id2ValueMap = reader.outData;
 			Meuse.inDistanceValues = id2ValueMap;
+			
+			readerV.nextRecord();
+			id2ValueMap = readerV.outData;
+			Meuse.inExperimentalVariogramValues= id2ValueMap;
 
 
 			Meuse.process();
@@ -64,6 +73,7 @@ public class TestTheoreticalVariogram extends HMTestCase {
 		}
 		//
 		reader.close();
+		readerV.close();
 		writer.close();
 
 

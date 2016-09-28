@@ -1,7 +1,6 @@
 package krigingsTests;
 
-import java.io.File;
-import java.net.URL;
+
 import java.util.HashMap;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -19,12 +18,12 @@ public class TestVariogramOLD extends HMTestCase {
 
 
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "resources/Input/jura.shp";
+		stationsReader.file = "resources/Input/experimentalVGM/jura.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="resources/Input/variogram_test.csv";
+		reader.file ="resources/Input/experimentalVGM/variogram_test.csv";
 		reader.idfield = "ID";
 		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;
