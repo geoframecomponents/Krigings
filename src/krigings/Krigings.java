@@ -150,9 +150,13 @@ public class Krigings extends JGTModel {
 	@In
 	public boolean doDetrended;
 	
-	@Description("The trend in the detrended mode")
-	@In
-	double trend;
+	@Description("The double value of the trend")
+	@Out
+	double trend_intercept;
+
+	@Description("The double value of the trend")
+	@Out
+	double trend_coefficient;
 
 
 
@@ -479,8 +483,9 @@ public class Krigings extends JGTModel {
 
 					}
 
-
-					h0 =(doDetrended)? h0 + trend:h0;
+					
+					double trend=(doDetrended)?coordinate.z*trend_coefficient+trend_intercept:0;
+				    h0= h0 + trend;
 
 
 					result[j] = h0;
