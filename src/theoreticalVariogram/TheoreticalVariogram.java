@@ -38,9 +38,13 @@ import org.jgrasstools.gears.libs.modules.JGTModel;
 @SuppressWarnings("nls")
 public class TheoreticalVariogram extends JGTModel {
 
-	@Description("Air temperature input Hashmap")
+	@Description("Distances input Hashmap")
 	@In
 	public HashMap<Integer, double[]> inDistanceValues;
+	
+	@Description("Experimental Variogram input Hashmap")
+	@In
+	public HashMap<Integer, double[]> inExperimentalVariogramValues;
 
 	@Description("Distances value.")
 	@In
@@ -66,6 +70,13 @@ public class TheoreticalVariogram extends JGTModel {
 	@Out
 	public String modelName;
 
+	@Description("the output hashmap withe the semivariance")
+	@Out
+	public double [] result;
+	
+	@Description("the output hashmap withe the semivariance")
+	@Out
+	public double [] observation;
 	
 	@Description("the output hashmap withe the semivariance")
 	@Out
@@ -78,14 +89,18 @@ public class TheoreticalVariogram extends JGTModel {
 
 		// reading the ID of all the stations 
 		Set<Entry<Integer, double[]>> entrySet = inDistanceValues.entrySet();
+		result=  new double[inDistanceValues.size()];
+		observation=  new double[inDistanceValues.size()];
 
 		for (Entry<Integer, double[]> entry : entrySet) {
 			Integer ID = entry.getKey();
 
-			distance=inDistanceValues.get(ID)[0];
-
+			distance=inDistanceValues.get(ID)[0];		
 			
-			storeResult((Integer)ID,calculateVGM(modelName, distance, sill, range, nugget));
+			storeResult((Integer)ID,result[ID]);
+			
+			result[ID]=calculateVGM(modelName, distance, sill, range, nugget);
+			observation[ID]=inExperimentalVariogramValues.get(ID)[0];
 
 		}
 	}
