@@ -16,11 +16,8 @@
  */
 package experimentalVariogram;
 
-import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import oms3.annotations.Author;
 import oms3.annotations.Description;
@@ -35,18 +32,14 @@ import oms3.annotations.Out;
 import oms3.annotations.Status;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.SchemaException;
 import org.jgrasstools.gears.libs.modules.JGTConstants;
 import org.jgrasstools.gears.libs.modules.JGTModel;
-import org.jgrasstools.gears.libs.modules.ModelsEngine;
 import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
 import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
-import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
-import org.opengis.feature.simple.SimpleFeature;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
+
+import krigings.StationsSelection;
 
 @Description("Experimental semivariogram algorithm.")
 @Documentation("Experimental semivariogram")
@@ -79,13 +72,23 @@ public class ExperimentalVariogram extends JGTModel {
 	@In
 	public HashMap<Integer, double[]> inData = null;
 
-	
-	@Description("Spatial separation distance up to which point pairs are included in semivariance estimates; "
-			+ "as a default, the length of the diagonal of the box spanning the data is divided by three.")
-	@In
-	public double pCutoff;
 
+	@Description("Include zeros in computations (default is true).")
+	@In
+	public boolean doIncludezero = true;
 	
+	@Description("In the case of kriging with neighbor, maxdist is the maximum distance "
+			+ "within the algorithm has to consider the stations")
+	@In
+	public double maxdist;
+
+
+	@Description("In the case of kriging with neighbor, inNumCloserStations is the number "
+			+ "of stations the algorithm has to consider")
+	@In
+	public int inNumCloserStations;
+
+
 	@Description("The Experimental Distances.")
 	@Out
 	public HashMap<Integer, double[]>  outDistances;
@@ -94,10 +97,10 @@ public class ExperimentalVariogram extends JGTModel {
 	@Description("The Experimental Variogram.")
 	@Out
 	public HashMap<Integer, double[]>  outExperimentalVariogram;
-	
+
 
 	boolean areAllEquals;
-	
+
 
 	int differents;
 
@@ -105,8 +108,6 @@ public class ExperimentalVariogram extends JGTModel {
 	@Description("The progress monitor.")
 	@In
 	public IJGTProgressMonitor pm = new LogProgressMonitor();
-
-	private HortonMessageHandler msg = HortonMessageHandler.getInstance();
 
 
 	/**
@@ -116,123 +117,30 @@ public class ExperimentalVariogram extends JGTModel {
 	 */
 	@Execute
 	public void process() throws Exception {
+		
+		StationsSelection stations=new StationsSelection();
 
-		List<Double> xStationList = new ArrayList<Double>();
-		List<Double> yStationList = new ArrayList<Double>();
-		List<Double> zStationList = new ArrayList<Double>();
-		List<Double> hStationList = new ArrayList<Double>();
+		stations.inStations=inStations;
+		stations.inData=inData;
+		stations.doIncludezero=doIncludezero;
+		stations.maxdist=maxdist;
+		stations.inNumCloserStations=inNumCloserStations;
+		stations.fStationsid=fStationsid;
+		stations.n1=differents;
+		
+		stations.execute();
+		
+		double [] xStations=stations.xStationInitialSet;
+		double [] yStations=stations.yStationInitialSet;
+		double [] hStations=stations.hStationInitialSet;
 
-		/*
-		 * counter for the number of station with measured value !=0.
-		 */
-		int n1 = 0;
-
-		/*
-		 * Store the station coordinates and measured data in the array.
-		 */
-		FeatureIterator<SimpleFeature> stationsIter = inStations.features();
-		try {
-			while (stationsIter.hasNext()) {
-				SimpleFeature feature = stationsIter.next();
-				int id = ((Number) feature.getAttribute(fStationsid))
-						.intValue();
-				double z = 0;
-				if (fStationsZ != null) {
-					try {
-						z = ((Number) feature.getAttribute(fStationsZ))
-								.doubleValue();
-					} catch (NullPointerException e) {
-						pm.errorMessage(msg.message("kriging.noStationZ"));
-						throw new Exception(msg.message("kriging.noStationZ"));
-
-					}
-				}
-				Coordinate coordinate = ((Geometry) feature
-						.getDefaultGeometry()).getCentroid().getCoordinate();
-
-
-				// h is the vector with measured data
-				double[] h = inData.get(id);
-				if (h == null || isNovalue(h[0])) {
-
-					/*
-					 * skip data for non existing stations.
-					 * Also skip novalues.
-					 */
-					continue;
-				}
-
-				if (Math.abs(h[0]) >= 0.0) { // TOLL
-					xStationList.add(coordinate.x);
-					yStationList.add(coordinate.y);
-					zStationList.add(z);
-					hStationList.add(h[0]);
-					n1 = n1 + 1;
-				}
-
-			}
-		} finally {
-			stationsIter.close();
-		}
-
-		int nStaz = xStationList.size();
-
-
-		/*
-		 * The coordinates of the station points plus in the last position a place
-		 * for the coordinate of the point to interpolate.
-		 */
-		double[] xStation = new double[nStaz];
-		double[] yStation = new double[nStaz];
-		double[] zStation = new double[nStaz];
-		double[] hStation = new double[nStaz];
-
-		areAllEquals = true;
-
-		differents = 0;
-
-		if (nStaz != 0) {
-			xStation[0] = xStationList.get(0);
-			yStation[0] = yStationList.get(0);
-			zStation[0] = zStationList.get(0);
-			hStation[0] = hStationList.get(0);
-
-			double previousValue = hStation[0];
-
-			for (int i = 1; i < nStaz; i++) {
-
-				double xTmp = xStationList.get(i);
-				double yTmp = yStationList.get(i);
-				double zTmp = zStationList.get(i);
-				double hTmp = hStationList.get(i);
-
-				boolean doubleStation = ModelsEngine.verifyDoubleStation(
-						xStation, yStation, zStation, hStation, xTmp, yTmp,
-						zTmp, hTmp, i, false, pm);
-
-				if (!doubleStation) {
-					xStation[i] = xTmp;
-					yStation[i] = yTmp;
-					zStation[i] = zTmp;
-					hStation[i] = hTmp;
-					if (areAllEquals && hStation[i] != previousValue) {
-
-						areAllEquals = false;
-					}
-					if (hStation[i] != previousValue) {
-						differents += 1;
-					}
-					previousValue = hStation[i];
-				}
-			}
-		}
 
 
 		// number of different stations
 		if (differents > 2) {
-			
 
-			double[][] outResult = processAlgorithm(xStation, yStation, hStation, pCutoff);
+
+			double[][] outResult = processAlgorithm(xStations, yStations, hStations, maxdist);
 			storeResult(outResult);
 
 		}
@@ -314,7 +222,7 @@ public class ExperimentalVariogram extends JGTModel {
 		mean /= (double) iCount; 
 
 		double[][] result = calculate(Cutoff, distanceMatrix,hStation,  mean, maxDistance);
-		
+
 		return result;
 
 	} 
@@ -333,7 +241,7 @@ public class ExperimentalVariogram extends JGTModel {
 			double maxDistance) {
 
 
-		int Cutoff_divide = 15;
+		int Cutoff_divide = 10;
 		double binAmplitude = cutoff / Cutoff_divide;
 
 
@@ -348,12 +256,12 @@ public class ExperimentalVariogram extends JGTModel {
 
 		int[] iPointsInClass = new int[iClasses]; 
 
-
 		double[] m_ddist = new double[iClasses];
-		int NonZero=0;
 
+		int contaNONzero=0;
+
+		
 		for (int i = 0; i < distanceMatrix.length; i++) {
-			
 			// first cycle input hStation 
 			double value1 = hStation[i]; 
 
@@ -362,23 +270,21 @@ public class ExperimentalVariogram extends JGTModel {
 
 					// return the class of considered distance 
 					int iClass = (int) Math.floor((distanceMatrix[i][j]) / binAmplitude);
-					
+
 					// counts the number of distances of each class
 					iPointsInClass[iClass]++; 
-
+					
 					// second cycle input hStation
 					double value2 = hStation[j]; 
 
 					// compute the numerator of the semivariance 
 					double dSemivar = Math.pow((value1 - value2), 2.); 
 
-					// sum all the semivariances for the considered class
-					
-					NonZero=(m_dSemivar[iClass]!=0)?NonZero:NonZero+1;
-					m_dSemivar[iClass] += dSemivar; 
+					// sum all the semivariances for the considered class					
+
+					m_dSemivar[iClass] += dSemivar;
 
 					m_ddist[iClass] += distanceMatrix[i][j]; 
-					
 
 				}
 			}
@@ -386,23 +292,31 @@ public class ExperimentalVariogram extends JGTModel {
 
 		}
 
-		double[][] result = new double[NonZero][2];
 
-		for (int i = 0; i < NonZero; i++) {
-				// Compute the semivariance
-				m_dSemivar[i] /= (2. * iPointsInClass[i]); 
+		double[][] result = new double[m_ddist.length][2];
+		
 
-				// Compute the mean distance for each class
-				m_ddist[i] /= iPointsInClass[i];
 
-				result[i][0] = m_ddist[i];
-				result[i][1] = m_dSemivar[i];	
+		for (int i = 0; i < m_ddist.length; i++) {
+
+			contaNONzero = (iPointsInClass[i]==0)?contaNONzero:contaNONzero+1;
+			
+			// Compute the semivariance
+			m_dSemivar[i] = (iPointsInClass[i]==0)?0:m_dSemivar[i]/(2. * iPointsInClass[i]); 
+
+			// Compute the mean distance for each class
+			m_ddist[i] = (iPointsInClass[i]==0)?0:m_ddist[i]/iPointsInClass[i];
+
+			result[i][0] = m_ddist[i];
+			result[i][1] = m_dSemivar[i];
 		}
-	
+
+
+
 		return result;
 
 	}
-	
+
 	/**
 	 * Store result.
 	 *
@@ -413,10 +327,10 @@ public class ExperimentalVariogram extends JGTModel {
 			throws SchemaException {
 		outDistances = new HashMap<Integer, double[]>();
 		outExperimentalVariogram = new HashMap<Integer, double[]>();
-		
+
 		for (int i=0;i<result.length;i++){
-		outDistances.put(i, new double[]{result[i][0]});
-		outExperimentalVariogram.put(i, new double[]{result[i][1]});
+			outDistances.put(i, new double[]{result[i][0]});
+			outExperimentalVariogram.put(i, new double[]{result[i][1]});
 		}
 	}
 
