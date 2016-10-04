@@ -18,6 +18,7 @@ public class TestExperimentalVariogram extends HMTestCase {
 
 
 		//
+
 		String stationIdField = "Id";
 
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
@@ -30,7 +31,7 @@ public class TestExperimentalVariogram extends HMTestCase {
 		reader.idfield = "ID";
 		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;
-		// reader.tEnd = "2000-01-01 00:00";
+		reader.tEnd = "2000-01-01 00:00";
 		reader.fileNovalue = "-9999";
 
 		reader.initProcess();
@@ -46,6 +47,7 @@ public class TestExperimentalVariogram extends HMTestCase {
 		writer.file = "resources/Output/experimentalVGM/experimental_distances.csv";
 		writer.tStart = reader.tStart;
 		writer.tTimestep = reader.tTimestep;
+		
 
 		OmsTimeSeriesIteratorWriter writerS = new OmsTimeSeriesIteratorWriter();
 		writerS.file = "resources/Output/experimentalVGM/experimental_variogram.csv";
@@ -74,7 +76,6 @@ public class TestExperimentalVariogram extends HMTestCase {
 		reader.close();
 		writer.close();
 		writerS.close();
-
 
 
 		/*

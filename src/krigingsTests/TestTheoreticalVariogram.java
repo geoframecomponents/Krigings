@@ -15,8 +15,6 @@ public class TestTheoreticalVariogram extends HMTestCase {
 	@SuppressWarnings("nls")
 	public void testTheoreticalVariogram() throws Exception {
 
-
-
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
 		reader.file ="resources/Input/theoreticalVGM/experimental_distances.csv";
 		reader.idfield = "ID";
@@ -38,7 +36,7 @@ public class TestTheoreticalVariogram extends HMTestCase {
 		readerV.initProcess();
 
 		TheoreticalVariogram Meuse = new TheoreticalVariogram();
-		Meuse.pm = pm;
+		//Meuse.pm = pm;
 
 		Meuse.modelName="linear";
         Meuse.range = 123537.0;

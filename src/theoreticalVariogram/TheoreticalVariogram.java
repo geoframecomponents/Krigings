@@ -27,6 +27,9 @@ import org.geotools.feature.SchemaException;
 import org.jgrasstools.gears.libs.modules.JGTConstants;
 import org.jgrasstools.gears.libs.modules.JGTModel;
 
+
+
+
 @Description("Teorethical semivariogram models.")
 @Documentation("vgm.html")
 @Author(name = "Giuseppe Formetta, Adami Francesco & Marialaura Bancheri", contact = " http://www.ing.unitn.it/dica/hp/?user=rigon")
@@ -41,10 +44,15 @@ public class TheoreticalVariogram extends JGTModel {
 	@Description("Distances input Hashmap")
 	@In
 	public HashMap<Integer, double[]> inDistanceValues;
-	
+
 	@Description("Experimental Variogram input Hashmap")
 	@In
 	public HashMap<Integer, double[]> inExperimentalVariogramValues;
+	
+	
+	@Description("Distances value.")
+	@In
+	public boolean doCalibrate;
 
 	@Description("Distances value.")
 	@In
@@ -73,14 +81,14 @@ public class TheoreticalVariogram extends JGTModel {
 	@Description("the output hashmap withe the semivariance")
 	@Out
 	public double [] result;
-	
+
 	@Description("the output hashmap withe the semivariance")
 	@Out
 	public double [] observation;
-	
+
 	@Description("the output hashmap withe the semivariance")
 	@Out
-	public HashMap<Integer, double[]> outHMtheoreticalVariogram= new HashMap<Integer, double[]>();
+	public HashMap<Integer, double[]> outHMtheoreticalVariogram=new HashMap<Integer, double[]>();;
 
 	Model modelVGM;
 
@@ -96,14 +104,18 @@ public class TheoreticalVariogram extends JGTModel {
 			Integer ID = entry.getKey();
 
 			distance=inDistanceValues.get(ID)[0];		
-			
-			storeResult((Integer)ID,result[ID]);
-			
+
 			result[ID]=calculateVGM(modelName, distance, sill, range, nugget);
 			observation[ID]=inExperimentalVariogramValues.get(ID)[0];
-
+		
+			storeVariogramResults(ID,result[ID]);
 		}
+
+
 	}
+
+
+
 
 
 	public double calculateVGM( String model,double distance, double sill, double range, double nug) {
@@ -113,13 +125,13 @@ public class TheoreticalVariogram extends JGTModel {
 
 		return result;
 	}
+
 	
-	
-	private void storeResult(Integer ID,double result) 
+	private void storeVariogramResults(int ID, double result) 
 			throws SchemaException {
 
 		outHMtheoreticalVariogram.put(ID, new double[]{result});
-
+		
 	}
-
 }
+
