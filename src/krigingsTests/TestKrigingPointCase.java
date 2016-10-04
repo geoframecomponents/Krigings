@@ -58,11 +58,12 @@ public class TestKriging extends HMTestCase {
 		//
 		kriging.inInterpolate = interpolatedPointsFC;
 		kriging.fInterpolateid = "netnum";
-		kriging.inNumCloserStations=5;
+        kriging.maxdist=5200000;
 
         kriging.range = 123537.0;
         kriging.nugget = 0.0;
         kriging.sill= 1.678383;
+        
 
 		//
 		OmsTimeSeriesIteratorWriter writer = new OmsTimeSeriesIteratorWriter();
@@ -150,6 +151,7 @@ public class TestKriging extends HMTestCase {
         kriging.range = 123537.0;
         kriging.nugget = 0.0;
         kriging.sill= 1.678383;
+        kriging.maxdist=1000;
 
 
 
@@ -230,6 +232,7 @@ public class TestKriging extends HMTestCase {
         kriging.range = 123537.0;
         kriging.nugget = 0.0;
         kriging.sill= 1.678383;
+        //kriging.maxdist=1000;
 
 		 
 		//

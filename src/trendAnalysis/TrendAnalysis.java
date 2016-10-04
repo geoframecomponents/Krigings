@@ -94,15 +94,31 @@ public class TrendAnalysis extends JGTModel {
 	public boolean doIncludezero = true;
 
 
+	@Description("The threshold on correlation coefficient for the trend in detrendend mode.")
+	@In
+	public double thresholdCorrelation;
+
+	@Description("Degree of polynomial regression, default is 1")
+	@In
+	public int regressionOrder=1;
+
+
 	@Description("Switch for detrended mode.")
 	@In
 	@Out
 	public boolean doDetrended = true;
 
 
-	@Description("The threshold on correlation coefficient for the trend in detrendend mode.")
+
+	@Description("Intercept of the linear regression")
 	@In
-	public double thresholdCorrelation;
+	@Out
+	public double trend_intercept=0;
+
+	@Description("Coefficient of the linear regression")
+	@In
+	@Out
+	public double trend_coefficient=0;
 
 
 	@Description("The hashmap withe the interpolated results")
@@ -120,15 +136,6 @@ public class TrendAnalysis extends JGTModel {
 
 
 	int id;
-
-
-	@Description("The double value of the trend")
-	@Out
-	double trend_intercept;
-
-	@Description("The double value of the trend")
-	@Out
-	double trend_coefficient;
 
 
 
@@ -172,12 +179,15 @@ public class TrendAnalysis extends JGTModel {
 
 					}
 				}
+
+
 				Coordinate coordinate = ((Geometry) feature.getDefaultGeometry()).getCentroid().getCoordinate();
 				double[] h = inData.get(id);
 				if (h == null || isNovalue(h[0])) {
 
 					continue;
 				}
+
 				if (doIncludezero) {
 					if (Math.abs(h[0]) >= 0.0) { // TOLL
 						xStationList.add(coordinate.x);
@@ -259,12 +269,7 @@ public class TrendAnalysis extends JGTModel {
 		}
 
 
-
-
 		double[] hresiduals=null;
-		double[] zStation = zStationInitialSet;
-		double[] hStation = hStationInitialSet;			
-
 
 
 		if (n1 != 0) {
@@ -272,8 +277,8 @@ public class TrendAnalysis extends JGTModel {
 
 				Regression r = new Regression();
 
-				r = new Regression(zStation, hStation);
-				r.linear();
+				r = new Regression(zStationInitialSet, hStationInitialSet);
+				r.polynomial(regressionOrder);
 
 
 				/*If there is a trend for meteorological
@@ -281,7 +286,6 @@ public class TrendAnalysis extends JGTModel {
 				 * then the residuals from this linear trend
 				 * are computed for each meteorological stations.
 				 */
-
 				if (r.getXYcorrCoeff() > thresholdCorrelation) {
 
 					trend_intercept=r.getBestEstimates()[0];
@@ -291,7 +295,7 @@ public class TrendAnalysis extends JGTModel {
 				} else {
 					System.out.println("The trend is not significant");
 					doDetrended=false;
-					
+
 				}
 			}
 
@@ -301,14 +305,9 @@ public class TrendAnalysis extends JGTModel {
 
 		}
 
-		storeResult(hresiduals,hStation,idStationInitialSet);
+		storeResult(hresiduals,hStationInitialSet,idStationInitialSet);
 
 	}
-
-
-
-
-
 
 
 	/**

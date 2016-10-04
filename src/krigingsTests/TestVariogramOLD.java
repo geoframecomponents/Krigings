@@ -14,20 +14,20 @@ public class TestVariogramOLD extends HMTestCase {
     public void testVariogram() throws Exception {
 
         //
-        String stationIdField = "Id";
+        String stationIdField = "ID_P";
 
 
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "resources/Input/experimentalVGM/jura.shp";
+		stationsReader.file = "/Users/marialaura/Desktop/testW/final_station.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="resources/Input/experimentalVGM/variogram_test.csv";
-		reader.idfield = "ID";
-		reader.tStart = "2000-01-01 00:00";
+		reader.file ="/Users/marialaura/Desktop/testW/P1994_1995.csv";
+		reader.idfield = "ID_P";
+		reader.tStart = "1994-01-01 00:00";
 		reader.tTimestep = 60;
-		// reader.tEnd = "2000-01-01 00:00";
+		 reader.tEnd = "1994-01-01 02:00";
 		reader.fileNovalue = "-9999";
 
         reader.initProcess();
