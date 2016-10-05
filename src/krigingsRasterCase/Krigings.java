@@ -173,7 +173,7 @@ public class Krigings extends JGTModel {
 	
 	private WritableRaster outWR;
 	
-	GridGeometry2D inInterpolationGrid;
+	public GridGeometry2D inInterpolationGrid;
 
 
 
@@ -191,7 +191,6 @@ public class Krigings extends JGTModel {
 
 	@Execute
 	public void executeKriging() throws Exception {
-
 
 		inInterpolationGrid = inGridCoverage2D.getGridGeometry();
 
@@ -377,13 +376,18 @@ public class Krigings extends JGTModel {
 	private LinkedHashMap<Integer, Coordinate> getCoordinate(GridGeometry2D grid) {
 		LinkedHashMap<Integer, Coordinate> out = new LinkedHashMap<Integer, Coordinate>();
 		int count = 0;
-		RegionMap regionMap = CoverageUtilities.gridGeometry2RegionParamsMap(grid);
-		double cols = regionMap.getCols();
-		double rows = regionMap.getRows();
+		RegionMap regionMap = CoverageUtilities
+				.gridGeometry2RegionParamsMap(grid);
+		int cols = regionMap.getCols();
+		int rows = regionMap.getRows();
 		double south = regionMap.getSouth();
 		double west = regionMap.getWest();
 		double xres = regionMap.getXres();
 		double yres = regionMap.getYres();
+
+		outWR = CoverageUtilities.createDoubleWritableRaster(cols, rows, null,
+				null, null);
+
 		double northing = south;
 		double easting = west;
 		for (int i = 0; i < cols; i++) {
@@ -400,10 +404,6 @@ public class Krigings extends JGTModel {
 
 		return out;
 	}
-
-
-
-
 
 	/**
 	 * Covariance matrix calculation.

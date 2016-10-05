@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import krigings.Krigings;
-
-
 import org.geotools.data.simple.SimpleFeatureCollection;
 
 import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
@@ -15,8 +12,10 @@ import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
 
 import org.jgrasstools.hortonmachine.utils.HMTestCase;
 
+import krigingsPointCase.Krigings;
 
-public class TestKriging extends HMTestCase {
+
+public class TestKrigingPointCase extends HMTestCase {
 
 
 	/**
@@ -31,17 +30,17 @@ public class TestKriging extends HMTestCase {
 	
 	public void testKriging2() throws Exception {
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "resources/Input/krigings/rainstations.shp";
+		stationsReader.file = "resources/Input/krigings/PointCase/rainstations.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 		//
 		OmsShapefileFeatureReader interpolatedPointsReader = new OmsShapefileFeatureReader();
-		interpolatedPointsReader.file = "resources/Input/krigings/basins_passirio_width0.shp";
+		interpolatedPointsReader.file = "resources/Input/krigings/PointCase/basins_passirio_width0.shp";
 		interpolatedPointsReader.readFeatureCollection();
 		SimpleFeatureCollection interpolatedPointsFC = interpolatedPointsReader.geodata;
 		//
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="resources/Input/krigings/rain_test2A.csv";
+		reader.file ="resources/Input/krigings/PointCase/rain_test2A.csv";
 		reader.idfield = "ID";
 		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;
@@ -63,11 +62,12 @@ public class TestKriging extends HMTestCase {
         kriging.range = 123537.0;
         kriging.nugget = 0.0;
         kriging.sill= 1.678383;
+        kriging.pSemivariogramType="linear";
         
 
 		//
 		OmsTimeSeriesIteratorWriter writer = new OmsTimeSeriesIteratorWriter();
-		writer.file = "resources/Output/krigings/kriging_interpolated.csv";
+		writer.file = "resources/Output/krigings/PointCase/kriging_interpolated.csv";
 		//
 		writer.tStart = reader.tStart;
 		writer.tTimestep = reader.tTimestep;
@@ -117,17 +117,17 @@ public class TestKriging extends HMTestCase {
 	// */
 	public void testKriging4() throws Exception {
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "resources/Input/krigings/rainstations.shp";
+		stationsReader.file = "resources/Input/krigings/PointCase/rainstations.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 		//
 		OmsShapefileFeatureReader interpolatedPointsReader = new OmsShapefileFeatureReader();
-		interpolatedPointsReader.file = "resources/Input/krigings/basins_passirio_width0.shp";
+		interpolatedPointsReader.file = "resources/Input/krigings/PointCase/basins_passirio_width0.shp";
 		interpolatedPointsReader.readFeatureCollection();
 		SimpleFeatureCollection interpolatedPointsFC = interpolatedPointsReader.geodata;
 		//
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file = "resources/Input/krigings/rain_test.csv";
+		reader.file = "resources/Input/krigings/PointCase/rain_test.csv";
 		reader.idfield = "ID";
 		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;
@@ -158,7 +158,7 @@ public class TestKriging extends HMTestCase {
 		//
 		kriging.doIncludezero = false;
 		OmsTimeSeriesIteratorWriter writer = new OmsTimeSeriesIteratorWriter();
-		writer.file =  "resources/Output/krigings/kriging_interpolated_2.csv";
+		writer.file =  "resources/Output/krigings/PointCase/kriging_interpolated_2.csv";
 		//
 		writer.tStart = reader.tStart;
 		writer.tTimestep = reader.tTimestep;
@@ -196,17 +196,17 @@ public class TestKriging extends HMTestCase {
 	 */
 	public void testKriging5() throws Exception {
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "resources/Input/krigings/rainstations.shp";
+		stationsReader.file = "resources/Input/krigings/PointCase/rainstations.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 		//
 		OmsShapefileFeatureReader interpolatedPointsReader = new OmsShapefileFeatureReader();
-		interpolatedPointsReader.file = "resources/Input/krigings/basins_passirio_width0.shp";
+		interpolatedPointsReader.file = "resources/Input/krigings/PointCase/basins_passirio_width0.shp";
 		interpolatedPointsReader.readFeatureCollection();
 		SimpleFeatureCollection interpolatedPointsFC = interpolatedPointsReader.geodata;
 		//
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file = "resources/Input/krigings/rain_test3A.csv";
+		reader.file = "resources/Input/krigings/PointCase/rain_test3A.csv";
 		reader.idfield = "ID";
 		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;
@@ -237,7 +237,7 @@ public class TestKriging extends HMTestCase {
 		 
 		//
 		OmsTimeSeriesIteratorWriter writer = new OmsTimeSeriesIteratorWriter();
-		writer.file = "resources/Output/krigings/kriging_interpolated_3.csv";
+		writer.file = "resources/Output/krigings/PointCase/kriging_interpolated_3.csv";
 		//
 		writer.tStart = reader.tStart;
 		writer.tTimestep = reader.tTimestep;

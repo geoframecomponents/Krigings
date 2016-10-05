@@ -38,8 +38,7 @@ import org.jgrasstools.gears.libs.modules.JGTModel;
 import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
 import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
 
-
-import krigings.StationsSelection;
+import krigingsPointCase.StationsSelection;
 
 @Description("Experimental semivariogram algorithm.")
 @Documentation("Experimental semivariogram")
