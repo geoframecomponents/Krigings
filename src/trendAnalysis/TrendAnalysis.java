@@ -1,7 +1,9 @@
-/* This file is part of JGrasstools (http://www.jgrasstools.org)
- * (C) HydroloGIS - www.hydrologis.com 
- * 
- * JGrasstools is free software: you can redistribute it and/or modify
+/*
+ * GNU GPL v3 License
+ *
+ * Copyright 2016 Marialaura Bancheri
+ *
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -14,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package trendAnalysis;
 
 import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
