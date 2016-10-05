@@ -1,6 +1,6 @@
 package theoreticalVariogram;
 
-public class Circolar implements Model{
+public class Circular implements Model{
 	
 	double dist;
 	double sill;
@@ -8,7 +8,7 @@ public class Circolar implements Model{
 	double nug;
 	
 	
-	public Circolar (double dist, double sill, double range, double nug){	
+	public Circular (double dist, double sill, double range, double nug){	
 		this.dist=dist;
 		this.sill=sill;
 		this.range=range;
@@ -18,7 +18,7 @@ public class Circolar implements Model{
 	
 
 	@Override
-	public double result() {
+	public double computeSemivariance() {
 
         double hr;
         double  result = 0;

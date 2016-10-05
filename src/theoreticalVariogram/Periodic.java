@@ -36,7 +36,7 @@ public class Periodic implements Model{
 	
 
 	@Override
-	public double  result() {
+	public double  computeSemivariance() {
 		double result= 0;
 
             if (dist != 0.0) {

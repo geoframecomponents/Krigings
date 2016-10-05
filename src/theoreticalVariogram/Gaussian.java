@@ -37,7 +37,7 @@ public class Gaussian implements Model{
 
 
 	@Override
-	public double result() {
+	public double computeSemivariance() {
 
 		double result=0;
 		double hr= dist / (range);

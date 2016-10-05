@@ -51,7 +51,7 @@ public class SimpleModelFactory {
         }
         if ("circular".equals(type)) {
         	
-        	model=new Circolar (dist, sill, range, nug);
+        	model=new Circular (dist, sill, range, nug);
 
         }
         if ("bessel".equals(type)) {
@@ -68,9 +68,9 @@ public class SimpleModelFactory {
         	model=new Hole (dist, sill, range, nug);
 
         }
-        if ("logaritmic".equals(type)) {
+        if ("logarithmic".equals(type)) {
         	
-        	model = new Logaritmic(dist, sill, range, nug);
+        	model = new Logarithmic(dist, sill, range, nug);
 
         }
         if ("power".equals(type)) {

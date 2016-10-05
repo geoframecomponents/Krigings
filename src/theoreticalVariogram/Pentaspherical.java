@@ -36,7 +36,7 @@ public class Pentaspherical implements Model{
 	
 
 	@Override
-	public double result() {
+	public double computeSemivariance() {
     
         double result = 0;
         double hr = 0, h2r2;
@@ -46,7 +46,7 @@ public class Pentaspherical implements Model{
                 result = nug + sill * (hr * ((15.0 / 8.0) + h2r2 * ((-5.0 / 4.0) + h2r2 * (3.0 / 8.0))));
             }
             if (dist >= range) {
-                result = sill;
+                result = sill+nug;
             }
             //System.out.println(func[i]);
 

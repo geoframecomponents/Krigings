@@ -37,7 +37,7 @@ public class Bessel implements Model{
 
 
 	@Override
-	public double result() {
+	public double computeSemivariance() {
 		double hr;
 		double MIN_BESS = 1.0e-3;
 		double result =0;

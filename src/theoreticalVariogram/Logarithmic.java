@@ -18,7 +18,7 @@
  */
 package theoreticalVariogram;
 
-public class Logaritmic implements Model{
+public class Logarithmic implements Model{
 	
 	double dist;
 	double sill;
@@ -26,7 +26,7 @@ public class Logaritmic implements Model{
 	double nug;
 	
 	
-	public Logaritmic (double dist, double sill, double range, double nug){	
+	public Logarithmic (double dist, double sill, double range, double nug){	
 		this.dist=dist;
 		this.sill=sill;
 		this.range=range;
@@ -36,7 +36,7 @@ public class Logaritmic implements Model{
 	
 
 	@Override
-	public double result() {
+	public double computeSemivariance() {
 		double result=0;
             if (dist!= 0.0) {
                 result = nug + sill * (Math.log(dist / range));

@@ -37,7 +37,7 @@ public class Exponential implements Model{
 
 
 	@Override
-	public double result() {
+	public double computeSemivariance() {
 
 		double result = 0;
 

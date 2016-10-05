@@ -24,6 +24,6 @@ package theoreticalVariogram;
 public interface Model {
 
 	
-	abstract public double result ();
+	abstract public double computeSemivariance ();
 
 }

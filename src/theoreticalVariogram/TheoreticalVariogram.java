@@ -121,7 +121,7 @@ public class TheoreticalVariogram extends JGTModel {
 	public double calculateVGM( String model,double distance, double sill, double range, double nug) {
 
 		modelVGM=SimpleModelFactory.createModel(model,distance, sill, range, nug);
-		double result=modelVGM.result();
+		double result=modelVGM.computeSemivariance();
 
 		return result;
 	}
