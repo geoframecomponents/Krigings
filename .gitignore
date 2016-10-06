@@ -1,1 +1,4 @@
 /bin/
+/.gradle/
+/.nb-gradle/
+/.idea/
