@@ -39,11 +39,10 @@ public class Pentaspherical implements Model{
 	public double computeSemivariance() {
     
         double result = 0;
-        double hr = 0, h2r2;
+        double hr = 0;
             hr = dist / (range);
-            h2r2 = hr * hr;
             if (dist != 0.0) {
-                result = nug + sill * (hr * ((15.0 / 8.0) + h2r2 * ((-5.0 / 4.0) + h2r2 * (3.0 / 8.0))));
+                result = nug + sill * (hr * ((15.0 / 8.0) + Math.pow(hr, 3) * ((-5.0 / 4.0) + Math.pow(hr, 5)* (3.0 / 8.0))));
             }
             if (dist >= range) {
                 result = sill+nug;
