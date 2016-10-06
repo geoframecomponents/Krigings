@@ -28,14 +28,16 @@ import org.jgrasstools.gears.io.rasterwriter.OmsRasterWriter;
 import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 
+import org.junit.Test;
+import org.junit.Assert;
 
-import org.jgrasstools.hortonmachine.utils.HMTestCase;
 
 
 import krigingsRasterCase.Krigings;
 
 
-public class TestKrigingRasterCase extends HMTestCase {
+
+public class TestKrigingRasterCase {
 
 
 	/**
@@ -48,6 +50,7 @@ public class TestKrigingRasterCase extends HMTestCase {
 	 * @throws Exception
 	 */
 
+	@Test 
 	public void testKriging() throws Exception {
 		//
 		String stationIdField = "ID_P";
@@ -71,8 +74,6 @@ public class TestKrigingRasterCase extends HMTestCase {
 		reader.initProcess();
 
 		Krigings kriging = new Krigings();
-		kriging.pm = pm;
-
 		
 		OmsRasterReader demReader = new OmsRasterReader();
 		demReader.file = "resources/Input/krigings/RasterCase/dem.asc";

@@ -26,12 +26,16 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
-import org.jgrasstools.hortonmachine.utils.HMTestCase;
+
+import org.junit.Test;
 
 import experimentalVariogram.ExperimentalVariogram;
 
-public class TestExperimentalVariogram extends HMTestCase {
+
+public class TestExperimentalVariogram{
 	@SuppressWarnings("nls")
+	
+	@Test
 	public void testVariogram() throws Exception {
 
 
@@ -55,7 +59,6 @@ public class TestExperimentalVariogram extends HMTestCase {
 		reader.initProcess();
 
 		ExperimentalVariogram Meuse = new ExperimentalVariogram();
-		Meuse.pm = pm;
 
 		Meuse.inStations = stationsFC;
 		Meuse.fStationsid = stationIdField;

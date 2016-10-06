@@ -25,25 +25,26 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
-import org.jgrasstools.hortonmachine.utils.HMTestCase;
+import org.junit.Test;
 
 import trendAnalysis.TrendAnalysis;
 
 
-public class TestTrend extends HMTestCase {
+
+public class TestTrend {
 
 
-	
+@Test
 	public void testTrend() throws Exception {
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "resources/Input/krigings/rainstations.shp";
+		stationsReader.file = "resources/Input/krigings/PointCase/rainstations.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 		//
 
 		//
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="resources/Input/krigings/rain_test.csv";
+		reader.file ="resources/Input/krigings/PointCase/rain_test.csv";
 		reader.idfield = "ID";
 		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;

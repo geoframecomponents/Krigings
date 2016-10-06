@@ -29,12 +29,13 @@ import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
 
-import org.jgrasstools.hortonmachine.utils.HMTestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import krigingsPointCase.Krigings;
 
 
-public class TestKrigingPointCase extends HMTestCase {
+public class TestKrigingPointCase{
 
 
 	/**
@@ -47,6 +48,7 @@ public class TestKrigingPointCase extends HMTestCase {
 	 * @throws Exception
 	 */
 	
+	@Test
 	public void testKriging2() throws Exception {
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
 		stationsReader.file = "resources/Input/krigings/PointCase/rainstations.shp";
@@ -69,7 +71,7 @@ public class TestKrigingPointCase extends HMTestCase {
 		reader.initProcess();
 		//
 		Krigings kriging = new Krigings();
-		kriging.pm = pm;
+
 		//
 		kriging.inStations = stationsFC;
 		kriging.fStationsid = "ID_PUNTI_M";
@@ -156,7 +158,7 @@ public class TestKrigingPointCase extends HMTestCase {
 		reader.initProcess();
 		//
 		Krigings kriging = new Krigings();
-		kriging.pm = pm;
+		//kriging.pm = pm;
 		//
 		kriging.inStations = stationsFC;
 		kriging.fStationsid = "ID_PUNTI_M";
@@ -235,7 +237,7 @@ public class TestKrigingPointCase extends HMTestCase {
 		reader.initProcess();
 		//
 		Krigings kriging = new Krigings();
-		kriging.pm = pm;
+		//kriging.pm = pm;
 		//
 		kriging.inStations = stationsFC;
 		kriging.fStationsid = "ID_PUNTI_M";

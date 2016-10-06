@@ -24,13 +24,16 @@ import java.util.HashMap;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
 
-import org.jgrasstools.hortonmachine.utils.HMTestCase;
+import org.junit.Test;
+import org.junit.Assert;
 
 import theoreticalVariogram.TheoreticalVariogram;
 
 
-public class TestTheoreticalVariogram extends HMTestCase {
+public class TestTheoreticalVariogram {
 	@SuppressWarnings("nls")
+	
+	@Test
 	public void testTheoreticalVariogram() throws Exception {
 
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();

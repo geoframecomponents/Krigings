@@ -24,34 +24,39 @@ import java.util.HashMap;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
-import experimentalVariogram.OmsVariogramOLD;
-import org.jgrasstools.hortonmachine.utils.HMTestCase;
+import org.junit.Test;
 
-public class TestVariogramOLD extends HMTestCase {
+import experimentalVariogram.OmsVariogramOLD;
+
+import static org.junit.Assert.*;
+
+
+
+public class TestVariogramOLD {
     @SuppressWarnings("nls")
+    @Test
     public void testVariogram() throws Exception {
 
         //
-        String stationIdField = "ID_P";
+        String stationIdField = "Id";
 
 
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "/Users/marialaura/Desktop/testW/final_station.shp";
+		stationsReader.file = "resources/Input/experimentalVGM/jura.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="/Users/marialaura/Desktop/testW/P1994_1995.csv";
-		reader.idfield = "ID_P";
-		reader.tStart = "1994-01-01 00:00";
+		reader.file ="resources/Input/experimentalVGM/variogram_test.csv";
+		reader.idfield = "ID";
+		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;
-		 reader.tEnd = "1994-01-01 02:00";
+		//reader.tEnd = "1994-01-01 02:00";
 		reader.fileNovalue = "-9999";
 
         reader.initProcess();
 
         OmsVariogramOLD Meuse = new OmsVariogramOLD();
-        Meuse.pm = pm;
 
         Meuse.inStations = stationsFC;
         Meuse.fStationsid = stationIdField;
