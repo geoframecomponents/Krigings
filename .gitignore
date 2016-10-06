@@ -1,4 +1,5 @@
 /bin/
 /.gradle/
 /.nb-gradle/
-/.idea/
+/.idea/src/main/java/org
+src/test/java/krigingsTests
