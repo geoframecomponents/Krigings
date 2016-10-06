@@ -6,10 +6,6 @@ sourceCompatibility = '1.8'
 
 repositories {
 
-    maven { // flanagan
-        url 'http://www.chibi.ubc.ca/maven2/'
-    }
-    
     maven {
     	url 'http://download.osgeo.org/webdav/geotools/'
     }
@@ -19,11 +15,15 @@ repositories {
     }
     mavenCentral() //jgt
 
+    flatDir {
+        dirs 'lib'
+    }
 }
 
 dependencies {
 
     compile 'org.slf4j:slf4j-api:1.7.21'
+    compile name: 'flanagan'
 
 	compile group: 'org.geotools', name: 'gt-api', version: '15.1'
     compile group: 'flanagan', name: 'flanagan',version: '1.0'
