@@ -26,7 +26,6 @@ dependencies {
     compile name: 'flanagan'
 
 	compile group: 'org.geotools', name: 'gt-api', version: '15.1'
-    compile group: 'flanagan', name: 'flanagan',version: '1.0'
     // https://mvnrepository.com/artifact/org.jgrasstools/jgt-grass
     compile group: 'org.jgrasstools', name: 'jgt-grass', version: '0.7.8'
     // https://mvnrepository.com/artifact/org.jgrasstools/jgt-hortonmachine
