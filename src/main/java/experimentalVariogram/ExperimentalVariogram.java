@@ -209,9 +209,7 @@ public class ExperimentalVariogram extends JGTModel {
 		// compute the mean of the input hStation
 		mean /= (double) iCount; 
 
-		double[][] result = calculate(Cutoff, distanceMatrix,hStation,  mean, maxDistance);
-
-		return result;
+		return calculate(Cutoff, distanceMatrix,hStation,  mean, maxDistance);
 
 	} 
 
