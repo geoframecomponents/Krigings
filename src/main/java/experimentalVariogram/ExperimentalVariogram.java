@@ -61,12 +61,6 @@ public class ExperimentalVariogram extends JGTModel {
 	@In
 	public String fStationsid = null;
 
-
-	@Description("The field of the vector of stations, defining the elevation.")
-	@In
-	public String fStationsZ = null;
-
-
 	@Description("The file with the measured data, to be interpolated.")
 	@In
 	public HashMap<Integer, double[]> inData = null;
