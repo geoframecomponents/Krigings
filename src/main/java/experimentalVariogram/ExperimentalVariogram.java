@@ -149,7 +149,7 @@ public class ExperimentalVariogram extends JGTModel {
 	 * @param Cutoffinput the cutoff input
 	 * @return the double[][] matrix of the results of the processing
 	 */
-	public double[][] processAlgorithm(double[] xStation, double yStation[],
+	private double[][] processAlgorithm(double[] xStation, double yStation[],
 			double[] hStation, double Cutoffinput) {
 
 		double x1, x2, y1, y2;
