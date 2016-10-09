@@ -91,12 +91,7 @@ public class ExperimentalVariogram extends JGTModel {
 	@Out
 	public HashMap<Integer, double[]>  outExperimentalVariogram;
 
-
-	boolean areAllEquals;
-
-
 	int differents;
-
 
 	@Description("The progress monitor.")
 	@In
