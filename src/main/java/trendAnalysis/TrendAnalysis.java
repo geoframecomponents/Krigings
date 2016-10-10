@@ -129,11 +129,6 @@ public class TrendAnalysis extends JGTModel {
 	public HashMap<Integer, double[]> outResiduals= null;
 
 
-	@Description("The hashmap withe the interpolated results")
-	@Out
-	public HashMap<Integer, double[]> outDetrendedValues= null;
-
-
 	private HortonMessageHandler msg = HortonMessageHandler.getInstance();
 
 
@@ -298,6 +293,7 @@ public class TrendAnalysis extends JGTModel {
 				} else {
 					System.out.println("The trend is not significant");
 					doDetrended=false;
+					hresiduals=hStationInitialSet;
 
 				}
 			}
@@ -308,7 +304,7 @@ public class TrendAnalysis extends JGTModel {
 
 		}
 
-		storeResult(hresiduals,hStationInitialSet,idStationInitialSet);
+		storeResult(hresiduals,idStationInitialSet);
 
 	}
 
@@ -351,13 +347,11 @@ public class TrendAnalysis extends JGTModel {
 	 * @param id the associated id of the calculating points.
 	 * @throws SchemaException the schema exception
 	 */
-	private void storeResult(double [] hresiduals, double [] hStation, int [] id ) throws SchemaException {
+	private void storeResult(double [] hresiduals, int [] id ) throws SchemaException {
 		outResiduals = new HashMap<Integer, double[]>();
-		outDetrendedValues = new HashMap<Integer, double[]>();
 		for (int i = 0; i < hresiduals.length; i++) {			
 			hresiduals[i]=(hresiduals[i]<0)?0:hresiduals[i];
 			outResiduals.put(id[i], new double[] { hresiduals[i] });
-			outDetrendedValues.put(id[i], new double[] { hStation[i] });
 		}
 	}
 
