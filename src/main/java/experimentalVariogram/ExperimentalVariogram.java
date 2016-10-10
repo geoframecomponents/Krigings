@@ -114,10 +114,11 @@ public class ExperimentalVariogram extends JGTModel {
 		stations.maxdist=maxdist;
 		stations.inNumCloserStations=inNumCloserStations;
 		stations.fStationsid=fStationsid;
-		stations.n1=differents;
-		
+
 		stations.execute();
-		
+
+		differents = stations.n1;
+
 		double [] xStations=stations.xStationInitialSet;
 		double [] yStations=stations.yStationInitialSet;
 		double [] hStations=stations.hStationInitialSet;
