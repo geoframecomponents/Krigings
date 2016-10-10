@@ -26,6 +26,7 @@ import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import experimentalVariogram.ExperimentalVariogram;
@@ -96,7 +97,9 @@ public class TestExperimentalVariogram{
 		reader.close();
 		writer.close();
 		writerS.close();
-
+		Double val = 2.0;
+		Double res = 1.0;
+		Assert.assertEquals(res,val);
 
 	}
 
