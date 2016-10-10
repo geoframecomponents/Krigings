@@ -1,1 +1,5 @@
 /bin/
+/.gradle/
+/.nb-gradle/
+/.idea/src/main/java/org
+/build/
