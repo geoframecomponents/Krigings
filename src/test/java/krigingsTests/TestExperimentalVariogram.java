@@ -97,7 +97,7 @@ public class TestExperimentalVariogram{
 		reader.close();
 		writer.close();
 		writerS.close();
-		Double val = 2.0;
+		Double val = 1.0;
 		Double res = 1.0;
 		Assert.assertEquals(res,val);
 
