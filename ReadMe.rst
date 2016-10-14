@@ -16,6 +16,15 @@ This is a Gradle project
 
    Gradle logo
 
+To build the project just run
+
+::
+
+    ~ $ gradle build
+
+in the working directory. You will find the built ``.jar`` in
+``build/libs``.
+
 To build the ReadMe file from the markdown one in the doc/ReadMe folder
 
 ::
