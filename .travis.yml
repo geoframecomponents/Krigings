@@ -12,7 +12,7 @@ deploy:
   provider: releases
   api_key:
     secure: ovDxve/tT2163lPWf2qhxVtIZjR+8H8KaZV0boxQKrrjMTDlp6I6bpXDTVQZq12LQRtKTs9vNRd4nlNm6Wp+Wta6qtZi981P6EuqEDFsMRK9+eppkjQTnPSrRf0fYYL81QgAXBNaIYSJWLJ+k7Ou28Ikyb+/3QWFifkFTbo+LgU6MVE5lUJCsMOn0q2cPiWacvvgL51O6ZkEz5IAB5XxWFxCQdvdn6ExZxBOM3OiA8dGKRruNtXpI3qgREz219qrUJZhDxA2ATlWGKnobIK8b0/flhT7Xm84RVRWWabYB9zNhSO06o/BJsXvVTmt/+f3hITN3Ga/A0DG5IvZ9eOOPA0EpR2s/XLmenNCHLqHxzkMJd6AueA0VQVXPDE87sL7lsnvwaFHFiBZ91/K1zUZZRnIoy46351rlsvj/7J6+ge+tpm1FwFdycDjgOApkBavGmaZxtL3Y/nJ4QFW8ioVWA/eTZ4EfPFBFZJTsrO4N1+1Kt9MZeFpFcgNgHz8/lgcZtL/yIdCM08OnQkn/SxdjklIBpLjGeoeAzPTjsROfCw56b94RbFLdZpD1qH7zEGTcNiWqrYOuCYZL9XU0fFtvvG4vy9LmRR+orlnVqB1tdPE4V50Kvk4WxfSvUhvJ9FS1tQmIByBiKICIKYD2YLyXWcYMms2l7vfUxcLvtglUk8=
-  file: krigings.jar
+  file: build/libs/krigings.jar
   skip_cleanup: true
   on:
     tags: true
