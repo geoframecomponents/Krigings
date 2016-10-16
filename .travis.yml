@@ -9,9 +9,9 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
 before_deploy:
-    - export TAG=$(git tag --point-at=$(git rev-parse HEAD))
+    - export TAG=$(git describe --abbrev=0 --tags)
     - export MOD_TAG=${TAG#"v"}
-    - export RELEASE_PKG_FILE="${ls builds/lib/krigings-${MOD_TAG}.jar}"
+    - export RELEASE_PKG_FILE="$(ls build/libs/krigings-${MOD_TAG}.jar)"
 deploy:
   provider: releases
   api_key:
