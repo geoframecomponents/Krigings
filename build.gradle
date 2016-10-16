@@ -2,6 +2,14 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 sourceCompatibility = '1.8'
+version = '0.9.5'
+jar {
+    manifest {
+        attributes 'Implementation-Title' : 'Gradle Quickstart',
+                   'Implementation-Version': version
+    }
+}
+
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
