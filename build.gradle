@@ -2,7 +2,11 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 sourceCompatibility = '1.8'
-version = '0.9.6-2'
+if (project.hasProperty('projVersion')) {
+      project.version = project.projVersion
+} else {
+      project.version = 'na'
+}
 jar {
     manifest {
         attributes 'Implementation-Title' : 'Gradle Quickstart',
