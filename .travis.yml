@@ -14,7 +14,7 @@ before_deploy:
     - export MOD_TAG=${TAG#"v"}
     - export RELEASE_PKG_FILE="${GRADLE_BUILD_DIR}/Krigings-${MOD_TAG}.jar"
     - echo "deploying $RELEASE_PKG_FILE to GitHub releases"
-    - gradle -Pversion=$MOD_TAG build
+    - gradle -PprojVersion=$MOD_TAG build
 deploy:
   provider: releases
   api_key:
