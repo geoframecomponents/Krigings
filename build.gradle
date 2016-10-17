@@ -1,20 +1,25 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 sourceCompatibility = '1.8'
+
+// to get project version from command line, just type
+// $ gradle -PprojVersion=<version_number> build
+// default is na
 if (project.hasProperty('projVersion')) {
       project.version = project.projVersion
 } else {
       project.version = 'na'
 }
+
+// name with versioning of the jar file
 jar {
     manifest {
         attributes 'Implementation-Title' : 'Gradle Quickstart',
                    'Implementation-Version': version
     }
 }
-
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
 
