@@ -13,7 +13,7 @@ before_deploy:
     - export MOD_TAG=${TAG#"v"}
     - export RELEASE_PKG_FILE="krigings-${MOD_TAG}.jar"
     - echo "deploying $RELEASE_PKG_FILE to GitHub releases"
-    - gradle build && cd $TRAVIS_BUILD_DIR/build/libs/
+    - gradle build && cd build/libs/ && ls -al
 deploy:
   provider: releases
   api_key:
