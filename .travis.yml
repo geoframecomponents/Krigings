@@ -8,6 +8,8 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
+env:
+    - TRAVIS_BUILD_DIR=$HOME/build/libs
 before_deploy:
     - export TAG=$(git describe --abbrev=0 --tags)
     - export MOD_TAG=${TAG#"v"}
