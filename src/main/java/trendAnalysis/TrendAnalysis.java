@@ -284,7 +284,7 @@ public class TrendAnalysis extends JGTModel {
 				 * then the residuals from this linear trend
 				 * are computed for each meteorological stations.
 				 */
-				if (r.getXYcorrCoeff() > thresholdCorrelation) {
+				if (Math.abs(r.getXYcorrCoeff()) > thresholdCorrelation) {
 
 					trend_intercept=r.getBestEstimates()[0];
 					trend_coefficient=r.getBestEstimates()[1];
