@@ -82,6 +82,10 @@ public class ExperimentalVariogram extends JGTModel {
 			+ "of stations the algorithm has to consider")
 	@In
 	public int inNumCloserStations;
+	
+	@Description("Number of bins to consider in the anlysis")
+	@In
+	public int Cutoff_divide;
 
 
 	@Description("The Experimental Distances.")
@@ -166,9 +170,10 @@ public class ExperimentalVariogram extends JGTModel {
 		double Cutoff;
 		int iCount = xStation.length;
 		double distanceMatrix[][] = new double[iCount][iCount];
+		
 		double x_max = xStation[0], y_max = yStation[0], diagonal;
 		double x_min = xStation[0], y_min = yStation[0];
-		for (int i = 1; i < iCount; i++) {
+		for (int i = 1; i < iCount-1; i++) {
 
 			x_min = Math.min(x_min, xStation[i]);
 			y_min = Math.min(y_min, yStation[i]);
@@ -184,17 +189,18 @@ public class ExperimentalVariogram extends JGTModel {
 			Cutoff = diagonal / 3;
 		} else
 			Cutoff = Cutoffinput;
+		
 
 
 		// Compute the distance matrix
-		for (int i = 0; i < iCount; i++) {
+		for (int i = 0; i < iCount-1; i++) {
 			x1 = xStation[i];
 			y1 = yStation[i];
 			value = hStation[i];
 
 			mean += value;
 
-			for (int j = 0; j < iCount; j++) {
+			for (int j = 0; j < iCount-1; j++) {
 
 				x2 = xStation[j];
 				y2 = yStation[j];
@@ -209,6 +215,8 @@ public class ExperimentalVariogram extends JGTModel {
 
 			}
 		}
+		
+
 
 		// compute the mean of the input hStation
 		mean /= (double) iCount; 
@@ -231,7 +239,7 @@ public class ExperimentalVariogram extends JGTModel {
 			double maxDistance) {
 
 
-		int Cutoff_divide = 10;
+		Cutoff_divide=(Cutoff_divide==0)?30:Cutoff_divide;
 		double binAmplitude = cutoff / Cutoff_divide;
 
 
@@ -283,11 +291,11 @@ public class ExperimentalVariogram extends JGTModel {
 		}
 
 
-		double[][] result = new double[m_ddist.length][2];
+		double[][] result = new double[Cutoff_divide][2];
 		
 
 
-		for (int i = 0; i < m_ddist.length; i++) {
+		for (int i = 0; i < Cutoff_divide; i++) {
 
 			contaNONzero = (iPointsInClass[i]==0)?contaNONzero:contaNONzero+1;
 			

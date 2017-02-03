@@ -41,7 +41,7 @@ public class TestExperimentalVariogram{
 
 		//
 
-		String stationIdField = "Id";
+		String stationIdField = "id";
 
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
 		stationsReader.file = "resources/Input/experimentalVGM/jura.shp";

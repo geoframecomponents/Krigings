@@ -164,7 +164,7 @@ public class StationsSelection {
 			double previousValue = hStationInitialSet[0];
 
 			/* for each station added to the vector, it checks the coordinate/values and if they are
-			 * not null or equal, it adds to the list of the availble stations. If the coordinates
+			 * not null or equal, it adds to the list of the available stations. If the coordinates
 			 * or the values are all different, the flag areAllEquals  becomes false.   
 			 */
 
@@ -187,8 +187,8 @@ public class StationsSelection {
 					if (areAllEquals && hStationInitialSet[i] != previousValue) {
 						areAllEquals = false;
 					}
-					if (hStationInitialSet[i] != previousValue) {
-					}
+					//if (hStationInitialSet[i] != previousValue) {
+					//}
 					previousValue = hStationInitialSet[i];
 				}
 			}

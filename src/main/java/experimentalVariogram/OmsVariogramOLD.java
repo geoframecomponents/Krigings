@@ -224,7 +224,7 @@ public class OmsVariogramOLD extends JGTModel {
         double mean = 0;
         double maxDist = 0;
 
-        int Cutoff_divide = 15;
+        int Cutoff_divide = 10;
         double Cutoff;
         int iCount = xcord.length;
         double d[][] = new double[iCount][iCount];
