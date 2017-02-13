@@ -80,8 +80,8 @@ public class TestExperimentalVariogram{
 			HashMap<Integer, double[]> id2ValueMap = reader.outData;
 			Meuse.inData = id2ValueMap;
 
-
 			Meuse.process();
+			
 
 			HashMap<Integer, double[]> resultD = Meuse.outDistances;
 			HashMap<Integer, double[]> resultS = Meuse.outExperimentalVariogram;

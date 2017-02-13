@@ -42,6 +42,7 @@ public class MaxDistance implements Model{
 	public MaxDistance(double [] distanceVector, double maxdist){
 
 		this.distanceVector=distanceVector;
+		this.maxdist=maxdist;
 
 	}
 

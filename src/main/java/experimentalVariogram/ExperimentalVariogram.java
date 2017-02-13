@@ -72,10 +72,9 @@ public class ExperimentalVariogram extends JGTModel {
 	@In
 	public boolean doIncludezero = true;
 	
-	@Description("In the case of kriging with neighbor, maxdist is the maximum distance "
-			+ "within the algorithm has to consider the stations")
+	@Description("Specified cutoff")
 	@In
-	public double maxdist;
+	public double Cutoffinput;
 
 
 	@Description("In the case of kriging with neighbor, inNumCloserStations is the number "
@@ -86,6 +85,7 @@ public class ExperimentalVariogram extends JGTModel {
 	@Description("Number of bins to consider in the anlysis")
 	@In
 	public int Cutoff_divide;
+	
 
 
 	@Description("The Experimental Distances.")
@@ -117,8 +117,6 @@ public class ExperimentalVariogram extends JGTModel {
 		stations.inStations=inStations;
 		stations.inData=inData;
 		stations.doIncludezero=doIncludezero;
-		stations.maxdist=maxdist;
-		stations.inNumCloserStations=inNumCloserStations;
 		stations.fStationsid=fStationsid;
 
 		stations.execute();
@@ -129,14 +127,12 @@ public class ExperimentalVariogram extends JGTModel {
 		double [] yStations=stations.yStationInitialSet;
 		double [] hStations=stations.hStationInitialSet;
 
-		
-
 
 		// number of different stations
 		if (differents > 2) {
 
 
-			double[][] outResult = processAlgorithm(xStations, yStations, hStations, maxdist);
+			double[][] outResult = processAlgorithm(xStations, yStations, hStations, Cutoffinput);
 			storeResult(outResult);
 
 		}

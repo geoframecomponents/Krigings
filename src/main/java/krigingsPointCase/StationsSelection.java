@@ -62,15 +62,20 @@ public class StationsSelection {
 
 	/** The id station initial set. */
 	public int[] idStationInitialSet;
-	
+
 	/** The flag is true if all the stations are equals */
 	public boolean areAllEquals = true;
-	
+
 	/** The number of different stations. */
 	public int n1 = 0;
+
+	public double idx;
+
+	public double idy;
 	
-	
-	/** The model selectio for the choice of the stations. */
+
+
+	/** The model selection for the choice of the stations. */
 	Model modelSelection;
 
 
@@ -148,11 +153,11 @@ public class StationsSelection {
 		 */
 
 
-		xStationInitialSet = new double[nStaz+ 1];
-		yStationInitialSet = new double[nStaz+ 1];
-		zStationInitialSet = new double[nStaz+ 1];
-		hStationInitialSet = new double[nStaz+ 1];
-		idStationInitialSet = new int[nStaz + 1];
+		xStationInitialSet = new double[nStaz+1];
+		yStationInitialSet = new double[nStaz+1];
+		zStationInitialSet = new double[nStaz+1];
+		hStationInitialSet = new double[nStaz+1];
+		idStationInitialSet = new int[nStaz+1];
 
 
 		if (nStaz != 0) {
@@ -193,6 +198,8 @@ public class StationsSelection {
 				}
 			}
 		}
+		
+	
 
 		/* in case of kriging with neighbor computes the distances between the
 		 * point where is going to interpolate and the other stations and it
@@ -200,8 +207,6 @@ public class StationsSelection {
 		 */ 
 
 		if (inNumCloserStations > 0 || maxdist>0) {
-
-			inNumCloserStations= (inNumCloserStations> nStaz)? nStaz:inNumCloserStations;	
 
 			double x2, y2;
 			double dDifX, dDifY;
@@ -214,8 +219,8 @@ public class StationsSelection {
 				x2 = xStationInitialSet[jj];
 				y2 = yStationInitialSet[jj];
 
-				dDifX = xStationInitialSet[n1] - x2;
-				dDifY = yStationInitialSet[n1] - y2;
+				dDifX = idx - x2;
+				dDifY = idy - y2;
 				distanceVector[jj] = Math.sqrt(dDifX * dDifX + dDifY * dDifY); 
 				pos[jj] = jj;					
 			}
@@ -223,7 +228,9 @@ public class StationsSelection {
 			// sorts the distances
 			QuickSortAlgorithm t = new QuickSortAlgorithm(pm);
 			t.sort(distanceVector, pos);
+
 			
+			inNumCloserStations= (inNumCloserStations> nStaz)? nStaz:inNumCloserStations;
 			
 			/*
 			 * The dimension of the new vector of the station is then defined
@@ -231,45 +238,26 @@ public class StationsSelection {
 			 * by the users
 			 */
 
-		
+
 			modelSelection=SimpleModelFactory.createModel(distanceVector, inNumCloserStations, maxdist);
 			int dim=modelSelection.numberOfStations();
 
 
-			double[] xStationWithNeighbour = new double[dim];
-			double[] yStationWithNeighbour = new double[dim];
-			int[] idStationWithNeighbour = new int[dim];
-			double[] zStationWithNeighbour = new double[dim];
-			double[] hWithNeighbour = new double[dim];
+			double[] xStationWithNeighbour = new double[dim+1];
+			double[] yStationWithNeighbour = new double[dim+1];
+			int[] idStationWithNeighbour = new int[dim+1];
+			double[] zStationWithNeighbour = new double[dim+1];
+			double[] hWithNeighbour = new double[dim+1];
 
 
-			// it is necessary to actualize the counter of the stations
-			n1=0;
 
-			for (int i = 1; i < dim; i++) {					
-				if (doIncludezero) {
-					if (Math.abs(hStationInitialSet[(int) pos[i]]) >= 0.0) { // TOLL
-						xStationWithNeighbour[n1] = xStationInitialSet[(int) pos[i]];
-						yStationWithNeighbour[n1] = yStationInitialSet[(int) pos[i]];
-						zStationWithNeighbour[n1] = zStationInitialSet[(int) pos[i]];
-						idStationWithNeighbour[n1] = idStationInitialSet[(int) pos[i]];
+			for (int i = 0; i < dim; i++) {					
 
-						hWithNeighbour[n1] = hStationInitialSet[(int) pos[i]];
-						n1 += 1;
-					}
-				} else {
-					if (Math.abs(hStationInitialSet[(int) pos[i]]) > 0.0) {
-						xStationWithNeighbour[n1] = xStationInitialSet[(int) pos[i]];
-						yStationWithNeighbour[n1] = yStationInitialSet[(int) pos[i]];
-						zStationWithNeighbour[n1] = zStationInitialSet[(int) pos[i]];
-						idStationWithNeighbour[n1] = idStationInitialSet[(int) pos[i]];
-
-						hWithNeighbour[n1] = hStationInitialSet[(int) pos[i]];
-						n1 += 1;
-
-					}
-				}
-
+				xStationWithNeighbour[i] = xStationInitialSet[(int) pos[i]];
+				yStationWithNeighbour[i] = yStationInitialSet[(int) pos[i]];
+				zStationWithNeighbour[i] = zStationInitialSet[(int) pos[i]];
+				idStationWithNeighbour[i] = idStationInitialSet[(int) pos[i]];
+				hWithNeighbour[i] = hStationInitialSet[(int) pos[i]];
 			}
 
 			xStationInitialSet = xStationWithNeighbour;
@@ -279,7 +267,12 @@ public class StationsSelection {
 			hStationInitialSet = hWithNeighbour;
 
 		}
+		
+		
+
 
 	}
+	
+	
 
 }

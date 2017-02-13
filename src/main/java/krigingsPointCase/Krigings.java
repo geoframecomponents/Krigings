@@ -187,41 +187,12 @@ public class Krigings extends JGTModel {
 	public void executeKriging() throws Exception {
 
 		verifyInput();
-		
-		/**
-		 * StationsSelection is an external class that allows the 
-		 * selection of the stations involved in the study.
-		 * It is possible to define if to include stations with zero values,
-		 * station in a define neighborhood or within a max distance from 
-		 * the considered point.
-		 */
-		
-		StationsSelection stations=new StationsSelection();
-		
-		stations.inStations=inStations;
-		stations.inData=inData;
-		stations.doIncludezero=doIncludezero;
-		stations.maxdist=maxdist;
-		stations.inNumCloserStations=inNumCloserStations;
-		stations.fStationsid=fStationsid;
-		
-		stations.execute();
-		
-		double [] xStations=stations.xStationInitialSet;
-		double [] yStations=stations.yStationInitialSet;
-		double [] zStations=stations.zStationInitialSet;
-		double [] hStations=stations.hStationInitialSet;
-		boolean areAllEquals=stations.areAllEquals;
-		int n1=stations.n1;
-		
-			
-		
+				
 		LinkedHashMap<Integer, Coordinate> pointsToInterpolateId2Coordinates = null;
 
-		int numPointToInterpolate = 0;
 
 
-		pointsToInterpolateId2Coordinates = getCoordinate(numPointToInterpolate, inInterpolate, fInterpolateid);
+		pointsToInterpolateId2Coordinates = getCoordinate(0, inInterpolate, fInterpolateid);
 
 
 		Set<Integer> pointsToInterpolateIdSet = pointsToInterpolateId2Coordinates
@@ -234,17 +205,47 @@ public class Krigings extends JGTModel {
 		int[] idArray = new int[pointsToInterpolateId2Coordinates.size()];
 
 		while (idIterator.hasNext()) {
-			n1 = xStations.length - 1;
+			
 			double sum = 0.;
 			id = idIterator.next();
 			idArray[j] = id;
 
 			Coordinate coordinate = (Coordinate) pointsToInterpolateId2Coordinates.get(id);
-
-			// coordinate of the were it is going to interpolate
+			
+			/**
+			 * StationsSelection is an external class that allows the 
+			 * selection of the stations involved in the study.
+			 * It is possible to define if to include stations with zero values,
+			 * station in a define neighborhood or within a max distance from 
+			 * the considered point.
+			 */
+			
+			StationsSelection stations=new StationsSelection();
+			
+			stations.idx=coordinate.x;
+			stations.idy=coordinate.y;			
+			stations.inStations=inStations;
+			stations.inData=inData;
+			stations.doIncludezero=doIncludezero;
+			stations.maxdist=maxdist;
+			stations.inNumCloserStations=inNumCloserStations;
+			stations.fStationsid=fStationsid;
+			
+			stations.execute();
+			
+			double [] xStations=stations.xStationInitialSet;
+			double [] yStations=stations.yStationInitialSet;
+			double [] zStations=stations.zStationInitialSet;
+			double [] hStations=stations.hStationInitialSet;
+			boolean areAllEquals=stations.areAllEquals;
+			int n1 = xStations.length - 1;
+			
 			xStations[n1] = coordinate.x;
 			yStations[n1] = coordinate.y;
 			zStations[n1] = coordinate.z;
+			
+			
+
 
 
 

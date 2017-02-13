@@ -78,7 +78,7 @@ public class TestKrigingPointCase{
 		//
 		kriging.inInterpolate = interpolatedPointsFC;
 		kriging.fInterpolateid = "netnum";
-        kriging.maxdist=5200000;
+        kriging.maxdist=40368.0;
 
         kriging.range = 123537.0;
         kriging.nugget = 0.0;
