@@ -17,31 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package krigings;
+package leaveOneOut;
 
 
 // TODO: Auto-generated Javadoc
 /**
- * The Class MaxDistance.
+ * The Class NumberOfStations.
  */
-public class MaxDistance implements Model{
+public class NumberOfStations implements Model{
 
-	/** The maxdist. */
-	double maxdist;
-	
-	/** The distance vector. */
-	double [] distanceVector;
+	/** The in num closer stations. */
+	int inNumCloserStations;
 
 
 	/**
-	 * Instantiates a new max distance.
+	 * Instantiates a new number of stations.
 	 *
-	 * @param distanceVector the distance vector
-	 * @param maxdist the max distance
+	 * @param inNumCloserStations the in number closer stations
 	 */
-	public MaxDistance(double [] distanceVector, double maxdist){
+	public NumberOfStations(int inNumCloserStations){
 
-		this.distanceVector=distanceVector;
+		this.inNumCloserStations=inNumCloserStations;
 
 	}
 
@@ -51,19 +47,8 @@ public class MaxDistance implements Model{
 	 */
 	@Override
 	public int numberOfStations() {
-		// posDist is the number of the stations within the distance 
-		int posDist = distanceVector.length;
-		for (int k = 0; k < distanceVector.length; k++) {
-			if (distanceVector[k] > maxdist) {
-				posDist = k;
-				break;
-			}
-		}
 
-		// in case there are no stations within the distance, the algorithm considers
-		// at least the nearest 3
-		posDist=(posDist == 1)?posDist += 3:posDist;
-		return posDist;
+		return inNumCloserStations+1;
 	}
 
 

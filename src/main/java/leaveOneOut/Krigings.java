@@ -14,13 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package krigingsPointCase;
+package leaveOneOut;
 
 import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
 import oms3.annotations.Author;
@@ -90,20 +92,6 @@ public class Krigings extends JGTModel {
 	@In
 	public HashMap<Integer, double[]> inData = null;
 
-
-	@Description("The vector of the points in which the data have to be interpolated.")
-	@In
-	public SimpleFeatureCollection inInterpolate = null;
-
-
-	@Description("The field of the interpolated vector points, defining the id.")
-	@In
-	public String fInterpolateid = null;
-
-
-	@Description("The field of the interpolated vector points, defining the elevation.")
-	@In
-	public String fPointZ = null;
 
 
 	@Description("The progress monitor.")
@@ -190,10 +178,7 @@ public class Krigings extends JGTModel {
 				
 		LinkedHashMap<Integer, Coordinate> pointsToInterpolateId2Coordinates = null;
 
-
-
-		pointsToInterpolateId2Coordinates = getCoordinate(0, inInterpolate, fInterpolateid);
-
+		pointsToInterpolateId2Coordinates = getCoordinate(0, inStations, fStationsid);
 
 		Set<Integer> pointsToInterpolateIdSet = pointsToInterpolateId2Coordinates
 				.keySet();
@@ -223,7 +208,8 @@ public class Krigings extends JGTModel {
 			StationsSelection stations=new StationsSelection();
 			
 			stations.idx=coordinate.x;
-			stations.idy=coordinate.y;			
+			stations.idy=coordinate.y;
+			stations.idOut=id;
 			stations.inStations=inStations;
 			stations.inData=inData;
 			stations.doIncludezero=doIncludezero;
@@ -237,8 +223,13 @@ public class Krigings extends JGTModel {
 			double [] yStations=stations.yStationInitialSet;
 			double [] zStations=stations.zStationInitialSet;
 			double [] hStations=stations.hStationInitialSet;
+
+			
+			
 			boolean areAllEquals=stations.areAllEquals;
 			int n1 = xStations.length - 1;
+			
+			
 			
 			xStations[n1] = coordinate.x;
 			yStations[n1] = coordinate.y;
@@ -318,7 +309,7 @@ public class Krigings extends JGTModel {
 			} else {
 
 				pm.errorMessage("No value for this time step");
-
+				j = 0;
 				double[] value = inData.values().iterator().next();
 				result[j] = value[0];
 				j++;
@@ -385,9 +376,9 @@ public class Krigings extends JGTModel {
 				coordinate = ((Geometry) feature.getDefaultGeometry())
 						.getCentroid().getCoordinate();
 				double z = 0;
-				if (fPointZ != null) {
+				if (fStationsZ != null) {
 					try {
-						z = ((Number) feature.getAttribute(fPointZ))
+						z = ((Number) feature.getAttribute(fStationsZ))
 								.doubleValue();
 					} catch (NullPointerException e) {
 						pm.errorMessage(msg.message("kriging.noPointZ"));

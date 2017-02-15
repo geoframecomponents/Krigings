@@ -1,4 +1,4 @@
-package krigings;
+package leaveOneOut;
 
 
 // TODO: Auto-generated Javadoc
