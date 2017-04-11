@@ -140,6 +140,8 @@ public class TestKrigingPointCase{
 	// * @throws Exception
 	// * @throws Exception
 	// */
+	
+	@Test
 	public void testKriging4() throws Exception {
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
 		stationsReader.file = "resources/Input/krigings/PointCase/rainstations.shp";
@@ -177,6 +179,7 @@ public class TestKrigingPointCase{
         kriging.nugget = 0.0;
         kriging.sill= 1.678383;
         kriging.maxdist=1000;
+
 
 
 
@@ -219,6 +222,8 @@ public class TestKrigingPointCase{
 	 * @throws Exception
 	 * @throws Exception
 	 */
+	
+	@Test
 	public void testKriging5() throws Exception {
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
 		stationsReader.file = "resources/Input/krigings/PointCase/rainstations.shp";
@@ -248,6 +253,7 @@ public class TestKrigingPointCase{
 		//
 		kriging.inInterpolate = interpolatedPointsFC;
 		kriging.fInterpolateid = "netnum";
+		
 
 		
 		 // Set up the model in order to use the variogram with an explicit integral scale and
@@ -258,6 +264,7 @@ public class TestKrigingPointCase{
         kriging.nugget = 0.0;
         kriging.sill= 1.678383;
         //kriging.maxdist=1000;
+        
 
 		 
 		//

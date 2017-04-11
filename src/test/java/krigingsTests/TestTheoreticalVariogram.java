@@ -37,7 +37,7 @@ public class TestTheoreticalVariogram {
 	public void testTheoreticalVariogram() throws Exception {
 
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="resources/Input/theoreticalVGM/experimental_distances.csv";
+		reader.file ="resources/Output/experimentalVGM/experimental_distances.csv";
 		reader.idfield = "ID";
 		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;
@@ -46,7 +46,7 @@ public class TestTheoreticalVariogram {
 		
 		
 		OmsTimeSeriesIteratorReader readerV = new OmsTimeSeriesIteratorReader();
-		readerV.file ="resources/Input/theoreticalVGM/experimental_variogram.csv";
+		readerV.file ="resources/Output/experimentalVGM/experimental_variogram.csv";
 		readerV.idfield = "ID";
 		readerV.tStart = "2000-01-01 00:00";
 		readerV.tTimestep = 60;
@@ -59,10 +59,12 @@ public class TestTheoreticalVariogram {
 		TheoreticalVariogram Meuse = new TheoreticalVariogram();
 		//Meuse.pm = pm;
 
-		Meuse.modelName="linear";
-        Meuse.range = 123537.0;
-        Meuse.nugget = 0.0;
-        Meuse.sill= 1.678383;
+		Meuse.modelName="power";
+        Meuse.range = 2.221328110091;
+        Meuse.nugget = 5.050696956032775;
+        Meuse.sill= 4.988372025611679;
+            
+        
 
 
 		OmsTimeSeriesIteratorWriter writer = new OmsTimeSeriesIteratorWriter();

@@ -30,9 +30,10 @@ import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import leaveOneOut.Krigings;
+
+import static org.junit.Assert.*;
 
 
 public class TestLeaveOneOut{

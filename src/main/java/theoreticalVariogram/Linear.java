@@ -40,10 +40,10 @@ public class Linear implements Model{
 
         double result = 0;
 
-            if (dist != 0.0) {
+            if (dist > 0.0 & dist <= range) {
                 result = nug + sill * (dist / range);
             }
-            if (dist >= range) {
+            if (dist > range) {
                 result = sill+nug;
             }
  

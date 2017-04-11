@@ -1,10 +1,9 @@
 @T,table
-Created,2017-02-03 13:03
+Created,2017-03-21 16:38
 Author,HortonMachine library
-@H,timestamp,value_1152,value_1058,value_1221,value_1224,value_1164,value_1133,value_1101,value_1165,value_1358,value_1136,value_1008,value_1010,value_1330,value_1331,value_1332,value_1079,value_1048,value_1020
-ID,,1152,1058,1221,1224,1164,1133,1101,1165,1358,1136,1008,1010,1330,1331,1332,1079,1048,1020
-Type,Date,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double,Double
-Format,yyyy-MM-dd HH:mm,,,,,,,,,,,,,,,,,,
-,2000-01-01 00:00,0.2704484150565645,1.4067907682730838,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.3756285556652412,0.1289157501118957,0.0,0.0,1.947254839626663,0.06754794673789277,0.0,0.0
-,2000-01-01 01:00,0.2704484150565645,1.4067907682730838,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.3756285556652412,0.1289157501118957,0.0,0.0,1.947254839626663,0.06754794673789277,0.0,0.0
+@H,timestamp,value_0,value_90250
+ID,,0,90250
+Type,Date,Double,Double
+Format,yyyy-MM-dd HH:mm,,
+,2008-01-01 00:00,0.0,0.0
 

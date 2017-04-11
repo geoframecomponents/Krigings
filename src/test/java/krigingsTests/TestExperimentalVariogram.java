@@ -53,13 +53,14 @@ public class TestExperimentalVariogram{
 		reader.idfield = "ID";
 		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60;
-		reader.tEnd = "2000-01-01 00:00";
-		reader.fileNovalue = "-9999";
+		//reader.tEnd = "2014-02-15 10:00";
+		reader.fileNovalue = "-9999.0";
 
 		reader.initProcess();
 
 		ExperimentalVariogram Meuse = new ExperimentalVariogram();
 
+		Meuse.Cutoff_divide=1;
 		Meuse.inStations = stationsFC;
 		Meuse.fStationsid = stationIdField;
 
@@ -80,7 +81,9 @@ public class TestExperimentalVariogram{
 			HashMap<Integer, double[]> id2ValueMap = reader.outData;
 			Meuse.inData = id2ValueMap;
 
+			
 			Meuse.process();
+			
 			
 
 			HashMap<Integer, double[]> resultD = Meuse.outDistances;

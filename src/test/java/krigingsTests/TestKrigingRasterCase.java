@@ -34,6 +34,7 @@ import org.junit.Assert;
 
 
 import krigingsRasterCase.Krigings;
+import pathGenerator.PathGenerator;
 
 
 
@@ -69,7 +70,7 @@ public class TestKrigingRasterCase {
 		reader.idfield = "ID_P";
 		reader.tStart = "1994-01-01 00:00";
 		reader.tTimestep = 60;
-		 reader.tEnd = "1994-01-01 00:00";
+		 reader.tEnd = "1994-01-01 01:00";
 		reader.fileNovalue = "-999";
 		reader.initProcess();
 
@@ -93,6 +94,8 @@ public class TestKrigingRasterCase {
 		kriging.nugget = 0.0;
 		kriging.sill= 1.678383;
 		kriging.pSemivariogramType="linear";
+		
+		PathGenerator path=new PathGenerator();
 
 
 		while( reader.doProcess ) {
@@ -104,13 +107,17 @@ public class TestKrigingRasterCase {
 			 * Extract the result.
 			 */
 
+			path.pathToOutData="resources/Output/krigings/RasterCase/krigings.asc";
+			path.tCurrent=reader.tCurrent;
+			path.process();
+			
 
 
 			GridCoverage2D krigingRaster = kriging.outGrid;
 			
 			OmsRasterWriter writerRaster = new OmsRasterWriter();
 			writerRaster.inRaster = krigingRaster;
-			writerRaster.file = "resources/Output/krigings/RasterCase/krigings.asc";
+			writerRaster.file = path.pathOutDataComplete;
 			writerRaster.process();
 
 			
