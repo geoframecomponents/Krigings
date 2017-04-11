@@ -74,6 +74,9 @@ public class StationsSelection {
 	public double idy;
 	
 
+	public String fStationsZ = null;
+	
+
 
 	/** The model selection for the choice of the stations. */
 	Model modelSelection;
@@ -107,9 +110,26 @@ public class StationsSelection {
 				SimpleFeature feature = stationsIter.next();
 				int id = ((Number) feature.getAttribute(fStationsid)).intValue();
 
+
 				double z = 0;
+				
+				
+				if (fStationsZ != null) {
+					try {
+						z = ((Number) feature.getAttribute(fStationsZ))
+								.doubleValue();
+					} catch (NullPointerException e) {
+
+
+					}
+				}
 
 				Coordinate coordinate = ((Geometry) feature.getDefaultGeometry()).getCentroid().getCoordinate();
+				
+				if(inData.get(id)==null){
+					
+					
+				}
 				double[] h = inData.get(id);
 				if (h == null || isNovalue(h[0])) {
 
@@ -192,8 +212,7 @@ public class StationsSelection {
 					if (areAllEquals && hStationInitialSet[i] != previousValue) {
 						areAllEquals = false;
 					}
-					//if (hStationInitialSet[i] != previousValue) {
-					//}
+
 					previousValue = hStationInitialSet[i];
 				}
 			}

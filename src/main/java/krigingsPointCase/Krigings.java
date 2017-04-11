@@ -52,6 +52,8 @@ import theoreticalVariogram.TheoreticalVariogram;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
+import flanagan.analysis.Regression;
+
 
 @Description("Ordinary kriging algorithm.")
 @Documentation("Kriging.html")
@@ -145,7 +147,7 @@ public class Krigings extends JGTModel {
 	@Description("Switch for detrended mode.")
 	@In
 	public boolean doDetrended;
-	
+
 	@Description("The double value of the trend")
 	@In
 	public double trend_intercept;
@@ -153,6 +155,11 @@ public class Krigings extends JGTModel {
 	@Description("The double value of the trend")
 	@In
 	public double trend_coefficient;
+
+
+	@Description("Degree of polynomial regression, default is 1")
+	@In
+	public int regressionOrder=1;
 
 
 
@@ -187,7 +194,7 @@ public class Krigings extends JGTModel {
 	public void executeKriging() throws Exception {
 
 		verifyInput();
-				
+
 		LinkedHashMap<Integer, Coordinate> pointsToInterpolateId2Coordinates = null;
 
 
@@ -205,13 +212,13 @@ public class Krigings extends JGTModel {
 		int[] idArray = new int[pointsToInterpolateId2Coordinates.size()];
 
 		while (idIterator.hasNext()) {
-			
+
 			double sum = 0.;
 			id = idIterator.next();
 			idArray[j] = id;
 
 			Coordinate coordinate = (Coordinate) pointsToInterpolateId2Coordinates.get(id);
-			
+
 			/**
 			 * StationsSelection is an external class that allows the 
 			 * selection of the stations involved in the study.
@@ -219,9 +226,9 @@ public class Krigings extends JGTModel {
 			 * station in a define neighborhood or within a max distance from 
 			 * the considered point.
 			 */
-			
+
 			StationsSelection stations=new StationsSelection();
-			
+
 			stations.idx=coordinate.x;
 			stations.idy=coordinate.y;			
 			stations.inStations=inStations;
@@ -230,24 +237,43 @@ public class Krigings extends JGTModel {
 			stations.maxdist=maxdist;
 			stations.inNumCloserStations=inNumCloserStations;
 			stations.fStationsid=fStationsid;
-			
+			stations.fStationsZ=fStationsZ;
+
 			stations.execute();
-			
+
 			double [] xStations=stations.xStationInitialSet;
 			double [] yStations=stations.yStationInitialSet;
 			double [] zStations=stations.zStationInitialSet;
 			double [] hStations=stations.hStationInitialSet;
 			boolean areAllEquals=stations.areAllEquals;
 			int n1 = xStations.length - 1;
-			
+
 			xStations[n1] = coordinate.x;
 			yStations[n1] = coordinate.y;
 			zStations[n1] = coordinate.z;
-			
-			
+
+			double[] hresiduals=hStations;
+
+			if(doDetrended){
+
+				Regression r = new Regression();
+
+				r = new Regression(zStations, hStations);
+				r.polynomial(regressionOrder);
 
 
+				/*If there is a trend for meteorological
+				 * variables and elevation and it is statistically significant 
+				 * then the residuals from this linear trend
+				 * are computed for each meteorological stations.
+				 */
 
+				trend_intercept=r.getBestEstimates()[0];
+				trend_coefficient=r.getBestEstimates()[1];
+				hresiduals = r.getResiduals();
+
+
+			}
 
 			if (n1 != 0) {
 
@@ -278,7 +304,7 @@ public class Krigings extends JGTModel {
 
 
 					for (int k = 0; k < n1; k++) {
-						h0 = h0 + moltiplicativeFactor[k] * hStations[k];
+						h0 = h0 + moltiplicativeFactor[k] * hresiduals[k];
 
 						// sum is computed to check that 
 						//the sum of all the weights is 1
@@ -286,9 +312,10 @@ public class Krigings extends JGTModel {
 
 					}
 
-					
+					//System.out.println(doDetrended);
 					double trend=(doDetrended)?coordinate.z*trend_coefficient+trend_intercept:0;
-				    h0= h0 + trend;
+					h0= h0 + trend;
+
 
 
 					result[j] = h0;
@@ -302,7 +329,7 @@ public class Krigings extends JGTModel {
 					pm.worked(1);
 				} else if (n1 == 1 || areAllEquals) {
 
-					double tmp = hStations[0];
+					double tmp = hresiduals[0];
 					pm.message(msg.message("kriging.setequalsvalue"));
 					pm.beginTask(msg.message("kriging.working"),
 							pointsToInterpolateId2Coordinates.size());

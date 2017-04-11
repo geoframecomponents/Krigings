@@ -54,6 +54,8 @@ import theoreticalVariogram.TheoreticalVariogram;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
+import flanagan.analysis.Regression;
+
 
 @Description("Ordinary kriging algorithm.")
 @Documentation("Kriging.html")
@@ -141,6 +143,15 @@ public class Krigings extends JGTModel {
 	@Description("The double value of the trend")
 	@In
 	public double trend_coefficient;
+	
+	@Description("Degree of polynomial regression, default is 1")
+	@In
+	public int regressionOrder=1;
+	
+	
+	@Description("The threshold on correlation coefficient for the trend in detrendend mode.")
+	@In
+	public double thresholdCorrelation;
 
 
 
@@ -216,6 +227,7 @@ public class Krigings extends JGTModel {
 			stations.maxdist=maxdist;
 			stations.inNumCloserStations=inNumCloserStations;
 			stations.fStationsid=fStationsid;
+			stations.fStationsZ=fStationsZ;
 			
 			stations.execute();
 			
@@ -235,8 +247,35 @@ public class Krigings extends JGTModel {
 			yStations[n1] = coordinate.y;
 			zStations[n1] = coordinate.z;
 			
+			double[] hresiduals=hStations;
 			
+			if(doDetrended){
 
+				Regression r = new Regression();
+
+				r = new Regression(zStations, hStations);
+				r.polynomial(regressionOrder);
+
+
+				/*If there is a trend for meteorological
+				 * variables and elevation and it is statistically significant 
+				 * then the residuals from this linear trend
+				 * are computed for each meteorological stations.
+				 */
+				//if (Math.abs(r.getXYcorrCoeff()) > thresholdCorrelation) {
+
+					trend_intercept=r.getBestEstimates()[0];
+					trend_coefficient=r.getBestEstimates()[1];
+					hresiduals = r.getResiduals();
+
+				//} else {
+					//System.out.println("The trend is not significant");
+					//doDetrended=false;
+					//hresiduals=hStations;
+
+				//}
+
+			}
 
 
 
@@ -269,7 +308,7 @@ public class Krigings extends JGTModel {
 
 
 					for (int k = 0; k < n1; k++) {
-						h0 = h0 + moltiplicativeFactor[k] * hStations[k];
+						h0 = h0 + moltiplicativeFactor[k] * hresiduals[k];
 
 						// sum is computed to check that 
 						//the sum of all the weights is 1
@@ -280,6 +319,8 @@ public class Krigings extends JGTModel {
 					
 					double trend=(doDetrended)?coordinate.z*trend_coefficient+trend_intercept:0;
 				    h0= h0 + trend;
+				    //System.out.println(doDetrended);
+				    //System.out.println("prova");
 
 
 					result[j] = h0;
@@ -293,7 +334,7 @@ public class Krigings extends JGTModel {
 					pm.worked(1);
 				} else if (n1 == 1 || areAllEquals) {
 
-					double tmp = hStations[0];
+					double tmp = hresiduals[0];
 					pm.message(msg.message("kriging.setequalsvalue"));
 					pm.beginTask(msg.message("kriging.working"),
 							pointsToInterpolateId2Coordinates.size());

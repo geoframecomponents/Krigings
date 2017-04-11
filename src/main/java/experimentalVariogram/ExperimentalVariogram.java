@@ -126,6 +126,7 @@ public class ExperimentalVariogram extends JGTModel {
 		double [] xStations=stations.xStationInitialSet;
 		double [] yStations=stations.yStationInitialSet;
 		double [] hStations=stations.hStationInitialSet;
+		int [] idStations=stations.idStationInitialSet;
 
 
 		// number of different stations
@@ -235,7 +236,7 @@ public class ExperimentalVariogram extends JGTModel {
 			double maxDistance) {
 
 
-		Cutoff_divide=(Cutoff_divide==0)?30:Cutoff_divide;
+		Cutoff_divide=(Cutoff_divide==0)?15:Cutoff_divide;
 		double binAmplitude = cutoff / Cutoff_divide;
 
 

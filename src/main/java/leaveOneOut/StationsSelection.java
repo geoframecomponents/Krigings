@@ -80,6 +80,8 @@ public class StationsSelection {
 	/** The model selection for the choice of the stations. */
 	Model modelSelection;
 
+	public String fStationsZ = null;
+
 
 
 
@@ -110,6 +112,18 @@ public class StationsSelection {
 				int id = ((Number) feature.getAttribute(fStationsid)).intValue();
 
 				double z = 0;
+
+
+				if (fStationsZ != null) {
+					try {
+						z = ((Number) feature.getAttribute(fStationsZ))
+								.doubleValue();
+					} catch (NullPointerException e) {
+
+
+					}
+				}
+
 
 				Coordinate coordinate = ((Geometry) feature.getDefaultGeometry()).getCentroid().getCoordinate();
 				double[] h = inData.get(id);
