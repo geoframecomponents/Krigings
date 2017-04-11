@@ -88,6 +88,13 @@ public class StationsSelection {
 	/** The number of different stations. */
 	public int n1 = 0;
 	
+	public double idx;
+
+	public double idy;
+	
+
+	public String fStationsZ = null;
+	
 	
 	/** The model selectio for the choice of the stations. */
 	Model modelSelection;
@@ -122,6 +129,16 @@ public class StationsSelection {
 				int id = ((Number) feature.getAttribute(fStationsid)).intValue();
 
 				double z = 0;
+				
+				if (fStationsZ != null) {
+					try {
+						z = ((Number) feature.getAttribute(fStationsZ))
+								.doubleValue();
+					} catch (NullPointerException e) {
+
+
+					}
+				}
 
 				Coordinate coordinate = ((Geometry) feature.getDefaultGeometry()).getCentroid().getCoordinate();
 				double[] h = inData.get(id);
@@ -206,8 +223,7 @@ public class StationsSelection {
 					if (areAllEquals && hStationInitialSet[i] != previousValue) {
 						areAllEquals = false;
 					}
-					if (hStationInitialSet[i] != previousValue) {
-					}
+
 					previousValue = hStationInitialSet[i];
 				}
 			}
@@ -219,8 +235,6 @@ public class StationsSelection {
 		 */ 
 
 		if (inNumCloserStations > 0 || maxdist>0) {
-
-			inNumCloserStations= (inNumCloserStations> nStaz)? nStaz:inNumCloserStations;	
 
 			double x2, y2;
 			double dDifX, dDifY;
@@ -262,33 +276,13 @@ public class StationsSelection {
 			double[] hWithNeighbour = new double[dim];
 
 
-			// it is necessary to actualize the counter of the stations
-			n1=0;
+			for (int i = 0; i < dim; i++) {					
 
-			for (int i = 1; i < dim; i++) {					
-				if (doIncludezero) {
-					if (Math.abs(hStationInitialSet[(int) pos[i]]) >= 0.0) { // TOLL
-						xStationWithNeighbour[n1] = xStationInitialSet[(int) pos[i]];
-						yStationWithNeighbour[n1] = yStationInitialSet[(int) pos[i]];
-						zStationWithNeighbour[n1] = zStationInitialSet[(int) pos[i]];
-						idStationWithNeighbour[n1] = idStationInitialSet[(int) pos[i]];
-
-						hWithNeighbour[n1] = hStationInitialSet[(int) pos[i]];
-						n1 += 1;
-					}
-				} else {
-					if (Math.abs(hStationInitialSet[(int) pos[i]]) > 0.0) {
-						xStationWithNeighbour[n1] = xStationInitialSet[(int) pos[i]];
-						yStationWithNeighbour[n1] = yStationInitialSet[(int) pos[i]];
-						zStationWithNeighbour[n1] = zStationInitialSet[(int) pos[i]];
-						idStationWithNeighbour[n1] = idStationInitialSet[(int) pos[i]];
-
-						hWithNeighbour[n1] = hStationInitialSet[(int) pos[i]];
-						n1 += 1;
-
-					}
-				}
-
+				xStationWithNeighbour[i] = xStationInitialSet[(int) pos[i]];
+				yStationWithNeighbour[i] = yStationInitialSet[(int) pos[i]];
+				zStationWithNeighbour[i] = zStationInitialSet[(int) pos[i]];
+				idStationWithNeighbour[i] = idStationInitialSet[(int) pos[i]];
+				hWithNeighbour[i] = hStationInitialSet[(int) pos[i]];
 			}
 
 			xStationInitialSet = xStationWithNeighbour;
@@ -298,7 +292,12 @@ public class StationsSelection {
 			hStationInitialSet = hWithNeighbour;
 
 		}
+		
+		
+
 
 	}
+	
+	
 
 }
