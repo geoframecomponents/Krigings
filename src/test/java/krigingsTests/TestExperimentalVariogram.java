@@ -41,18 +41,18 @@ public class TestExperimentalVariogram{
 
 		//
 
-		String stationIdField = "Id";
+		String stationIdField = "ID";
 
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "resources/Input/experimentalVGM/jura.shp";
+		stationsReader.file = "/Users/marialaura/Desktop/marco/stazioni_quote.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="resources/Input/experimentalVGM/variogram_test.csv";
+		reader.file ="/Users/marialaura/Desktop/marco/Temp_formattate.csv";
 		reader.idfield = "ID";
-		reader.tStart = "2000-01-01 00:00";
-		reader.tTimestep = 60;
+		reader.tStart = "2016-01-01 00:00";
+		reader.tTimestep = 60*24;
 		//reader.tEnd = "2014-02-15 10:00";
 		reader.fileNovalue = "-9999.0";
 
@@ -60,7 +60,8 @@ public class TestExperimentalVariogram{
 
 		ExperimentalVariogram Meuse = new ExperimentalVariogram();
 
-		Meuse.Cutoff_divide=1;
+		Meuse.Cutoff_divide=3;
+		Meuse.Cutoffinput=15000;
 		Meuse.inStations = stationsFC;
 		Meuse.fStationsid = stationIdField;
 

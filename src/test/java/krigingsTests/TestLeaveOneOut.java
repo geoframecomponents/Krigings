@@ -52,21 +52,24 @@ public class TestLeaveOneOut{
 	@Test
 	public void testKriging2() throws Exception {
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "resources/Input/krigings/PointCase/leave.shp";
+		stationsReader.file = "/Users/marialaura/Dropbox/dati_NewAge/EsercitazioniIdrologia2017/data/stazioni_quote.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 		//
+		/*
 		OmsShapefileFeatureReader interpolatedPointsReader = new OmsShapefileFeatureReader();
-		interpolatedPointsReader.file = "resources/Input/krigings/PointCase/leave.shp";
+		stationsReader.file = "/Users/marialaura/Dropbox/dati_NewAge/EsercitazioniIdrologia2017/data/stazioni_quote.shp";
 		interpolatedPointsReader.readFeatureCollection();
 		SimpleFeatureCollection interpolatedPointsFC = interpolatedPointsReader.geodata;
+		*/
+		
 		//
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="resources/Input/krigings/PointCase/rain_test1.csv";
+		reader.file = "/Users/marialaura/Dropbox/dati_NewAge/EsercitazioniIdrologia2017/data/STAZIONI_T3.csv";
 		reader.idfield = "ID";
-		reader.tStart = "2000-01-01 00:00";
+		reader.tStart = "2014-01-01 00:00";
 		reader.tTimestep = 60;
-		// reader.tEnd = "2000-01-01 00:00";
+		 reader.tEnd = "2014-01-01 00:00";
 		reader.fileNovalue = "-9999";
 		//
 		reader.initProcess();
@@ -75,18 +78,16 @@ public class TestLeaveOneOut{
 
 		//
 		kriging.inStations = stationsFC;
-		kriging.fStationsid = "ID_PUNTI_M";
-		kriging.fStationsZ="QUOTA";		
+		kriging.fStationsid = "ID_T";
+		kriging.fStationsZ="DEM";		
 		//
 
-        //kriging.maxdist=40368.0;
-
-        kriging.range = 123537.0;
-        kriging.nugget = 0.0;
-        kriging.sill= 1.678383;
-        kriging.pSemivariogramType="linear";
+		kriging.range = 49540.85603;
+		kriging.nugget = 0.285176585;
+		kriging.sill= 2.249785825;
+		kriging.pSemivariogramType="linear";
         
-
+		//kriging.doDetrended=true;
 		//
 		OmsTimeSeriesIteratorWriter writer = new OmsTimeSeriesIteratorWriter();
 		writer.file = "resources/Output/krigings/PointCase/kriging_interpolated_leave.csv";

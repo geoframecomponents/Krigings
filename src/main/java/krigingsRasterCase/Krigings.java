@@ -19,7 +19,9 @@
 package krigingsRasterCase;
 
 import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
+import static org.jgrasstools.gears.libs.modules.JGTConstants.doubleNovalue;
 
+import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -179,6 +181,7 @@ public class Krigings extends JGTModel {
 	private WritableRaster outWR;
 	
 	public GridGeometry2D inInterpolationGrid;
+	WritableRaster demWR;
 
 
 
@@ -201,6 +204,8 @@ public class Krigings extends JGTModel {
 
 
 		verifyInput();
+		
+		demWR=mapsTransform(inGridCoverage2D);
 
 		LinkedHashMap<Integer, Coordinate> pointsToInterpolateId2Coordinates = null;
 
@@ -216,6 +221,9 @@ public class Krigings extends JGTModel {
 
 		double[] result = new double[pointsToInterpolateId2Coordinates.size()];
 		int[] idArray = new int[pointsToInterpolateId2Coordinates.size()];
+		
+		final DirectPosition gridPoint = new DirectPosition2D();
+		MathTransform transf = inInterpolationGrid.getCRSToGrid2D();
 
 		while (idIterator.hasNext()) {
 
@@ -224,6 +232,17 @@ public class Krigings extends JGTModel {
 			idArray[j] = id;
 
 			Coordinate coordinate = (Coordinate) pointsToInterpolateId2Coordinates.get(id);
+			
+
+			DirectPosition point = new DirectPosition2D(
+					inInterpolationGrid.getCoordinateReferenceSystem(),
+					coordinate.x, coordinate.y);
+			transf.transform(point, gridPoint);
+
+			double[] gridCoord = gridPoint.getCoordinate();
+			int x = (int) gridCoord[0];
+			int y = (int) gridCoord[1];
+
 
 			/**
 			 * StationsSelection is an external class that allows the 
@@ -254,12 +273,23 @@ public class Krigings extends JGTModel {
 			boolean areAllEquals=stations.areAllEquals;
 			int n1 = xStations.length - 1;
 
+			
 			xStations[n1] = coordinate.x;
 			yStations[n1] = coordinate.y;
-			zStations[n1] = coordinate.z;
+			zStations[n1] = demWR.getSample(x, y,0);
+			
 			
 			double[] hresiduals=hStations;
-
+			
+			
+			if(doDetrended==true){
+			if(zStations[n1]<0){
+				doDetrended=false;
+			}else{
+				doDetrended=true;
+			}}
+			
+			
 			if(doDetrended){
 
 				Regression r = new Regression();
@@ -275,19 +305,24 @@ public class Krigings extends JGTModel {
 				 */
 				//if (Math.abs(r.getXYcorrCoeff()) > thresholdCorrelation) {
 
-				//System.out.println(r.getXYcorrCoeff());
-				trend_intercept=r.getBestEstimates()[0];
-				trend_coefficient=r.getBestEstimates()[1];
-				hresiduals = r.getResiduals();
+					trend_intercept=r.getBestEstimates()[0];
+					trend_coefficient=r.getBestEstimates()[1];
+					hresiduals = r.getResiduals();
 
+				//} else {
+					//System.out.println("The trend is not significant");
+					//doDetrended=false;
+					//hresiduals=hStations;
+
+				//}
+					
+					
 
 			}
 
-
-
-
 			if (n1 != 0) {
 
+				
 				if (!areAllEquals && n1 > 1) {
 					pm.beginTask(msg.message("kriging.working"),
 							pointsToInterpolateId2Coordinates.size());
@@ -323,12 +358,20 @@ public class Krigings extends JGTModel {
 
 					}
 
+					
+					double trend=(doDetrended)?zStations[n1]*trend_coefficient+trend_intercept:0;
 
-					double trend=(doDetrended)?coordinate.z*trend_coefficient+trend_intercept:0;
-					h0= h0 + trend;
+				    h0= h0 + trend;
+				    //System.out.println(doDetrended);
+				    //System.out.println("prova");
 
 
-					result[j] = h0;
+					if(zStations[n1]<0){
+						result[j] = doubleNovalue;
+					}else{
+						result[j] = h0;
+					}
+					
 					j++;
 
 					if (Math.abs(sum - 1) >= TOLL) {
@@ -343,7 +386,16 @@ public class Krigings extends JGTModel {
 					pm.message(msg.message("kriging.setequalsvalue"));
 					pm.beginTask(msg.message("kriging.working"),
 							pointsToInterpolateId2Coordinates.size());
-					result[j] = tmp;
+					
+
+					if(zStations[n1]<0){
+						result[j] = doubleNovalue;
+					}else{
+						result[j] = tmp;
+					}
+					
+					
+					
 					j++;
 					n1 = 0;
 					pm.worked(1);
@@ -357,11 +409,19 @@ public class Krigings extends JGTModel {
 				pm.errorMessage("No value for this time step");
 				j = 0;
 				double[] value = inData.values().iterator().next();
-				result[j] = value[0];
+				
+
+				if(zStations[n1]<0){
+					result[j] = doubleNovalue;
+				}else{
+					result[j] = value[0];
+				}
+				
 				j++;
 
 			}
-
+				
+			
 		}
 
 		storeResult(result, pointsToInterpolateId2Coordinates);
@@ -434,6 +494,21 @@ public class Krigings extends JGTModel {
 		}
 
 		return out;
+	}
+	
+	
+	/**
+	 * Maps reader transform the GrifCoverage2D in to the writable raster and
+	 * replace the -9999.0 value with no value.
+	 *
+	 * @param inValues: the input map values
+	 * @return the writable raster of the given map
+	 */
+	private WritableRaster mapsTransform  ( GridCoverage2D inValues){	
+		RenderedImage inValuesRenderedImage = inValues.getRenderedImage();
+		WritableRaster inValuesWR = CoverageUtilities.replaceNovalue(inValuesRenderedImage, -9999.0);
+		inValuesRenderedImage = null;
+		return inValuesWR;
 	}
 
 	/**
@@ -530,6 +605,11 @@ public class Krigings extends JGTModel {
 		return vgmResult;
 	}
 
+	
+	
+	
+	
+	
 	private void storeResult(double[] interpolatedValues,
 			HashMap<Integer, Coordinate> interpolatedCoordinatesMap)
 			throws MismatchedDimensionException, Exception {
