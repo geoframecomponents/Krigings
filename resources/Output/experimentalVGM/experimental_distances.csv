@@ -1,9 +1,9 @@
 @T,table
-Created,2017-04-11 14:52
+Created,2017-06-01 08:05
 Author,HortonMachine library
-@H,timestamp,value_0
-ID,,0
-Type,Date,Double
-Format,yyyy-MM-dd HH:mm,
-,2000-01-01 00:00,1.3103118712811186
+@H,timestamp,value_0,value_1,value_2
+ID,,0,1,2
+Type,Date,Double,Double,Double
+Format,yyyy-MM-dd HH:mm,,,
+,2000-01-01 00:00,0.4467985441982321,1.1404176777441615,1.8424906094830633
 
