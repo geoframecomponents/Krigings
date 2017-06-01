@@ -38,17 +38,18 @@ public class TestVariogramOLD {
     public void testVariogram() throws Exception {
 
         //
-		String stationIdField = "ID";
+		String stationIdField = "Id";
+
 
 		OmsShapefileFeatureReader stationsReader = new OmsShapefileFeatureReader();
-		stationsReader.file = "/Users/marialaura/Desktop/marco/stazioni_quote.shp";
+		stationsReader.file = "resources/Input/experimentalVGM/jura.shp";
 		stationsReader.readFeatureCollection();
 		SimpleFeatureCollection stationsFC = stationsReader.geodata;
 
 		OmsTimeSeriesIteratorReader reader = new OmsTimeSeriesIteratorReader();
-		reader.file ="/Users/marialaura/Desktop/marco/Temp_formattate.csv";
+		reader.file ="resources/Input/experimentalVGM/variogram_test.csv";
 		reader.idfield = "ID";
-		reader.tStart = "2016-01-01 00:00";
+		reader.tStart = "2000-01-01 00:00";
 		reader.tTimestep = 60*24;
 		//reader.tEnd = "2014-02-15 10:00";
 		reader.fileNovalue = "-9999.0";
@@ -59,7 +60,7 @@ public class TestVariogramOLD {
 
         Meuse.inStations = stationsFC;
         Meuse.fStationsid = stationIdField;
-        double[][] matrice;
+        //double[][] matrice;
 
         while( reader.doProcess ) {
             reader.nextRecord();
