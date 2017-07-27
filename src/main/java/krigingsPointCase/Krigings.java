@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import linearSistemSolver.SimpleLinearSystemSolverFactory;
 import oms3.annotations.Author;
 import oms3.annotations.Description;
 import oms3.annotations.Documentation;
@@ -43,7 +44,6 @@ import org.jgrasstools.gears.libs.modules.JGTModel;
 import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
 import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
 import org.jgrasstools.gears.utils.math.matrixes.ColumnVector;
-import org.jgrasstools.gears.utils.math.matrixes.LinearSystem;
 import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
 import org.opengis.feature.simple.SimpleFeature;
 
@@ -57,7 +57,7 @@ import flanagan.analysis.Regression;
 
 @Description("Ordinary kriging algorithm.")
 @Documentation("Kriging.html")
-@Author(name = "Giuseppe Formetta, Daniele Andreis, Silvia Franceschi, Andrea Antonello & Marialaura Bancheri")
+@Author(name = "Giuseppe Formetta, Daniele Andreis, Silvia Franceschi, Andrea Antonello, Marialaura Bancheri & Francesco Serafin")
 @Keywords("Kriging, Hydrology")
 @Label("")
 @Name("kriging")
@@ -161,6 +161,9 @@ public class Krigings extends JGTModel {
 	@In
 	public int regressionOrder=1;
 
+	@Description("Type of linear system solver")
+	@In
+	public String linearSystemSolverType = "default";
 
 
 	@Description("The hashmap withe the interpolated results")
@@ -294,11 +297,7 @@ public class Krigings extends JGTModel {
 					/*
 					 * solve the linear system, where the result is the weight (moltiplicativeFactor).
 					 */
-					ColumnVector knownTermColumn = new ColumnVector(knownTerm);
-
-					LinearSystem linearSystem = new LinearSystem(covarianceMatrix);
-
-					ColumnVector solution = linearSystem.solve(knownTermColumn,true);
+					ColumnVector solution = SimpleLinearSystemSolverFactory.solve(knownTerm,covarianceMatrix, linearSystemSolverType);
 
 					double[] moltiplicativeFactor = solution.copyValues1D();
 

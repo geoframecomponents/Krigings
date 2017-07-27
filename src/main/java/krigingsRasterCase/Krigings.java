@@ -31,6 +31,7 @@ import java.util.Set;
 import javax.media.jai.iterator.RandomIterFactory;
 import javax.media.jai.iterator.WritableRandomIter;
 
+import linearSistemSolver.SimpleLinearSystemSolverFactory;
 import oms3.annotations.Author;
 import oms3.annotations.Description;
 import oms3.annotations.Documentation;
@@ -54,7 +55,6 @@ import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
 import org.jgrasstools.gears.utils.RegionMap;
 import org.jgrasstools.gears.utils.coverage.CoverageUtilities;
 import org.jgrasstools.gears.utils.math.matrixes.ColumnVector;
-import org.jgrasstools.gears.utils.math.matrixes.LinearSystem;
 import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -70,7 +70,7 @@ import krigingsPointCase.StationsSelection;
 
 @Description("Ordinary kriging algorithm.")
 @Documentation("Kriging.html")
-@Author(name = "Giuseppe Formetta, Daniele Andreis, Silvia Franceschi, Andrea Antonello & Marialaura Bancheri")
+@Author(name = "Giuseppe Formetta, Daniele Andreis, Silvia Franceschi, Andrea Antonello, Marialaura Bancheri & Francesco Serafin")
 @Keywords("Kriging, Hydrology")
 @Label("")
 @Name("kriging")
@@ -162,7 +162,11 @@ public class Krigings extends JGTModel {
 	@Description("Degree of polynomial regression, default is 1")
 	@In
 	public int regressionOrder=1;
-	
+
+	@Description("Type of linear system solver")
+	@In
+	public String linearSystemSolverType = "default";
+
 
 	@Description("The interpolated gridded data ")
 	@Out
@@ -340,11 +344,7 @@ public class Krigings extends JGTModel {
 					/*
 					 * solve the linear system, where the result is the weight (moltiplicativeFactor).
 					 */
-					ColumnVector knownTermColumn = new ColumnVector(knownTerm);
-
-					LinearSystem linearSystem = new LinearSystem(covarianceMatrix);
-
-					ColumnVector solution = linearSystem.solve(knownTermColumn,true);
+					ColumnVector solution = SimpleLinearSystemSolverFactory.solve(knownTerm, covarianceMatrix, linearSystemSolverType);
 
 					double[] moltiplicativeFactor = solution.copyValues1D();
 
@@ -461,7 +461,7 @@ public class Krigings extends JGTModel {
 	/**
 	 * Gets the coordinate of each pixel of the given map.
 	 *
-	 * @param GridGeometry2D grid is the map 
+	 * @param grid is the map
 	 * @return the coordinate of each point
 	 */
 	private LinkedHashMap<Integer, Coordinate> getCoordinate(GridGeometry2D grid) {

@@ -18,13 +18,12 @@ package leaveOneOut;
 
 import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Set;
 
+import linearSistemSolver.SimpleLinearSystemSolverFactory;
 import oms3.annotations.Author;
 import oms3.annotations.Description;
 import oms3.annotations.Documentation;
@@ -45,7 +44,6 @@ import org.jgrasstools.gears.libs.modules.JGTModel;
 import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
 import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
 import org.jgrasstools.gears.utils.math.matrixes.ColumnVector;
-import org.jgrasstools.gears.utils.math.matrixes.LinearSystem;
 import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
 import org.opengis.feature.simple.SimpleFeature;
 
@@ -59,7 +57,7 @@ import flanagan.analysis.Regression;
 
 @Description("Ordinary kriging algorithm.")
 @Documentation("Kriging.html")
-@Author(name = "Giuseppe Formetta, Daniele Andreis, Silvia Franceschi, Andrea Antonello & Marialaura Bancheri")
+@Author(name = "Giuseppe Formetta, Daniele Andreis, Silvia Franceschi, Andrea Antonello, Marialaura Bancheri & Francesco Serafin")
 @Keywords("Kriging, Hydrology")
 @Label("")
 @Name("kriging")
@@ -152,6 +150,10 @@ public class Krigings extends JGTModel {
 	@Description("The threshold on correlation coefficient for the trend in detrendend mode.")
 	@In
 	public double thresholdCorrelation;
+
+	@Description("Type of linear system solver")
+	@In
+	public String linearSystemSolverType = "default";
 
 
 
@@ -298,11 +300,7 @@ public class Krigings extends JGTModel {
 					/*
 					 * solve the linear system, where the result is the weight (moltiplicativeFactor).
 					 */
-					ColumnVector knownTermColumn = new ColumnVector(knownTerm);
-
-					LinearSystem linearSystem = new LinearSystem(covarianceMatrix);
-
-					ColumnVector solution = linearSystem.solve(knownTermColumn,true);
+					ColumnVector solution = SimpleLinearSystemSolverFactory.solve(knownTerm, covarianceMatrix, linearSystemSolverType);
 
 					double[] moltiplicativeFactor = solution.copyValues1D();
 
