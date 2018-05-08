@@ -281,8 +281,8 @@ public class Krigings extends JGTModel {
 			if (n1 != 0) {
 
 				if (!areAllEquals && n1 > 1) {
-					pm.beginTask(msg.message("kriging.working"),
-							pointsToInterpolateId2Coordinates.size());
+					//pm.beginTask(msg.message("kriging.working"),
+							//pointsToInterpolateId2Coordinates.size());
 
 					double h0 = 0.0;
 
@@ -325,21 +325,21 @@ public class Krigings extends JGTModel {
 								"Error in the coffeicients calculation", this
 								.getClass().getSimpleName());
 					}
-					pm.worked(1);
+					  //pm.worked(1);
 				} else if (n1 == 1 || areAllEquals) {
 
 					double tmp = hresiduals[0];
 					pm.message(msg.message("kriging.setequalsvalue"));
-					pm.beginTask(msg.message("kriging.working"),
+					pm.beginTask(msg.message(""),
 							pointsToInterpolateId2Coordinates.size());
 					result[j] = tmp;
 					j++;
 					n1 = 0;
-					pm.worked(1);
+					//pm.worked(1);
 
 				}
 
-				pm.done();
+				//pm.done();
 
 			} else {
 
