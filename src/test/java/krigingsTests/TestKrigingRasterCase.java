@@ -23,10 +23,10 @@ import java.util.HashMap;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.jgrasstools.gears.io.rasterreader.OmsRasterReader;
-import org.jgrasstools.gears.io.rasterwriter.OmsRasterWriter;
-import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
-import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
+import org.hortonmachine.gears.io.rasterreader.OmsRasterReader;
+import org.hortonmachine.gears.io.rasterwriter.OmsRasterWriter;
+import org.hortonmachine.gears.io.shapefile.OmsShapefileFeatureReader;
+import org.hortonmachine.gears.io.timedependent.OmsTimeSeriesIteratorReader;
 
 import org.junit.Test;
 import org.junit.Assert;
@@ -78,8 +78,7 @@ public class TestKrigingRasterCase {
 		
 		OmsRasterReader demReader = new OmsRasterReader();
 		demReader.file = "resources/Input/krigings/RasterCase/dem.asc";
-		demReader.fileNovalue = -9999.0;
-		demReader.geodataNovalue = Double.NaN;
+
 		demReader.process();
 		GridCoverage2D dem = demReader.outRaster;
 
