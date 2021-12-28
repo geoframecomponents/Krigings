@@ -1,8 +1,8 @@
 package linearSistemSolver;
 
-import org.jgrasstools.gears.utils.math.matrixes.ColumnVector;
-import org.jgrasstools.gears.utils.math.matrixes.LinearSystem;
-import org.jgrasstools.gears.utils.math.matrixes.MatrixException;
+import org.hortonmachine.gears.utils.math.matrixes.ColumnVector;
+import org.hortonmachine.gears.utils.math.matrixes.LinearSystem;
+import org.hortonmachine.gears.utils.math.matrixes.MatrixException;
 
 public class SimpleLinearSystemSolverFactory {
 

@@ -26,20 +26,20 @@ import java.util.Map.Entry;
 import oms3.annotations.*;
 
 import org.geotools.feature.SchemaException;
-import org.jgrasstools.gears.libs.modules.JGTConstants;
-import org.jgrasstools.gears.libs.modules.JGTModel;
+import org.hortonmachine.gears.libs.modules.HMConstants;
+import org.hortonmachine.gears.libs.modules.HMModel;
 
 
 @Description("Teorethical semivariogram models.")
 @Documentation("vgm.html")
 @Author(name = "Giuseppe Formetta, Adami Francesco & Marialaura Bancheri", contact = " http://www.ing.unitn.it/dica/hp/?user=rigon")
 @Keywords("Kriging, Hydrology")
-@Label(JGTConstants.STATISTICS)
+@Label(HMConstants.STATISTICS)
 @Name("kriging")
 @Status(Status.CERTIFIED)
 @License("General Public License Version 3 (GPLv3)")
 @SuppressWarnings("nls")
-public class TheoreticalVariogram extends JGTModel {
+public class TheoreticalVariogram extends HMModel {
 
 	@Description("Distances input Hashmap")
 	@In

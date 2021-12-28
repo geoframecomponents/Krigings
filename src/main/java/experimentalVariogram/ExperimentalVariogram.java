@@ -35,10 +35,10 @@ import oms3.annotations.Status;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.SchemaException;
-import org.jgrasstools.gears.libs.modules.JGTConstants;
-import org.jgrasstools.gears.libs.modules.JGTModel;
-import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
-import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
+import org.hortonmachine.gears.libs.modules.HMConstants;
+import org.hortonmachine.gears.libs.modules.HMModel;
+import org.hortonmachine.gears.libs.monitor.IHMProgressMonitor;
+import org.hortonmachine.gears.libs.monitor.LogProgressMonitor;
 
 import krigingsPointCase.StationsSelection;
 
@@ -46,12 +46,12 @@ import krigingsPointCase.StationsSelection;
 @Documentation("Experimental semivariogram")
 @Author(name = "Giuseppe Formetta, Francesco Adami, Silvia Franceschi & Marialaura Bancheri")
 @Keywords("Experimental semivariogram, Kriging, Hydrology")
-@Label(JGTConstants.STATISTICS)
+@Label(HMConstants.STATISTICS)
 @Name("variogram")
 @Status(Status.CERTIFIED)
 @License("General Public License Version 3 (GPLv3)")
 @SuppressWarnings("nls")
-public class ExperimentalVariogram extends JGTModel {
+public class ExperimentalVariogram extends HMModel {
 
 
 	@Description("The vector of the measurement point, containing the position of the stations.")
@@ -101,7 +101,7 @@ public class ExperimentalVariogram extends JGTModel {
 
 	@Description("The progress monitor.")
 	@In
-	public IJGTProgressMonitor pm = new LogProgressMonitor();
+	public IHMProgressMonitor pm = new LogProgressMonitor();
 
 
 	/**

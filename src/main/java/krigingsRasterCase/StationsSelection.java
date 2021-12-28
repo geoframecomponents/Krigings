@@ -19,7 +19,7 @@
 
 package krigingsRasterCase;
 
-import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
+import static org.hortonmachine.gears.libs.modules.HMConstants.isNovalue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,14 +27,22 @@ import java.util.List;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.jgrasstools.gears.libs.modules.ModelsEngine;
-import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
-import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
-import org.jgrasstools.gears.utils.sorting.QuickSortAlgorithm;
+import org.hortonmachine.gears.libs.modules.ModelsEngine;
+import org.hortonmachine.gears.libs.monitor.IHMProgressMonitor;
+import org.hortonmachine.gears.libs.monitor.LogProgressMonitor;
+import org.hortonmachine.gears.utils.sorting.QuickSortAlgorithm;
 import org.opengis.feature.simple.SimpleFeature;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
+/*
+ * Niccolò Tubini 28-12-2021
+ * Replaced with lines 40 and 41 
+ * https://sourceforge.net/p/geotools/mailman/message/36652855/
+ */
+//import com.vividsolutions.jts.geom.Coordinate;
+//import com.vividsolutions.jts.geom.Geometry;
+
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -65,7 +73,7 @@ public class StationsSelection {
 
 
 	/** The pm. */
-	public IJGTProgressMonitor pm = new LogProgressMonitor();
+	public IHMProgressMonitor pm = new LogProgressMonitor();
 
 	/** The x station initial set. */
 	public double[] xStationInitialSet;
@@ -213,7 +221,7 @@ public class StationsSelection {
 				int idTmp = idStationList.get(i);
 
 				boolean doubleStation = ModelsEngine.verifyDoubleStation( xStationInitialSet, yStationInitialSet, zStationInitialSet, 
-						hStationInitialSet,xTmp,yTmp, zTmp, hTmp, i, false, pm);
+						hStationInitialSet,xTmp,yTmp, zTmp, hTmp, i, false);
 				if (!doubleStation) {
 					xStationInitialSet[i] = xTmp;
 					yStationInitialSet[i] = yTmp;
