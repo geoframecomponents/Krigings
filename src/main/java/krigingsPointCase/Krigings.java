@@ -140,6 +140,9 @@ public class Krigings extends HMModel {
 	@In
 	public double nugget;
 
+	@Description("Nugget, sill and range for the current time step. The parameters are provided as an OMS time series.")
+    @In
+    public HashMap<Integer, double[]> inParamTS;
 
 	@Description("In the case of kriging with neighbor, maxdist is the maximum distance "
 			+ "within the algorithm has to consider the stations")
@@ -222,6 +225,11 @@ public class Krigings extends HMModel {
 		double[] result = new double[pointsToInterpolateId2Coordinates.size()];
 		int[] idArray = new int[pointsToInterpolateId2Coordinates.size()];
 
+        if (this.inParamTS != null) {
+            this.nugget = this.inParamTS.get(0)[0];
+            this.sill = this.inParamTS.get(1)[0];
+            this.range = this.inParamTS.get(2)[0];
+        }
 		while (idIterator.hasNext()) {
 
 			double sum = 0.;
