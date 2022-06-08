@@ -22,9 +22,9 @@ package krigingsTests;
 import java.util.HashMap;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.jgrasstools.gears.io.shapefile.OmsShapefileFeatureReader;
-import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorReader;
-import org.jgrasstools.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
+import org.hortonmachine.gears.io.shapefile.OmsShapefileFeatureReader;
+import org.hortonmachine.gears.io.timedependent.OmsTimeSeriesIteratorReader;
+import org.hortonmachine.gears.io.timedependent.OmsTimeSeriesIteratorWriter;
 
 import org.junit.Assert;
 import org.junit.Test;

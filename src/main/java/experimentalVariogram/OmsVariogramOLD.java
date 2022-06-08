@@ -16,22 +16,22 @@
  */
 package experimentalVariogram;
 
-import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_AUTHORCONTACTS;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_AUTHORNAMES;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_DESCRIPTION;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_KEYWORDS;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_LABEL;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_LICENSE;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_NAME;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_STATUS;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_fStationsZ_DESCRIPTION;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_fStationsid_DESCRIPTION;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_inData_DESCRIPTION;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_inStations_DESCRIPTION;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_outResult_DESCRIPTION;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_pCutoff_DESCRIPTION;
-import static org.jgrasstools.hortonmachine.i18n.HortonMessages.OMSVARIOGRAM_pPath_DESCRIPTION;
+import static org.hortonmachine.gears.libs.modules.HMConstants.isNovalue;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_AUTHORCONTACTS;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_AUTHORNAMES;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_DESCRIPTION;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_KEYWORDS;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_LABEL;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_LICENSE;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_NAME;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_STATUS;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_fStationsZ_DESCRIPTION;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_fStationsid_DESCRIPTION;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_inData_DESCRIPTION;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_inStations_DESCRIPTION;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_outResult_DESCRIPTION;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_pCutoff_DESCRIPTION;
+import static org.hortonmachine.hmachine.i18n.HortonMessages.OMSVARIOGRAM_pPath_DESCRIPTION;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -53,9 +53,9 @@ import oms3.annotations.Status;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.jgrasstools.gears.libs.modules.JGTModel;
-import org.jgrasstools.gears.libs.modules.ModelsEngine;
-import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
+import org.hortonmachine.gears.libs.modules.HMModel;
+import org.hortonmachine.gears.libs.modules.ModelsEngine;
+import org.hortonmachine.hmachine.i18n.HortonMessageHandler;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -68,7 +68,7 @@ import com.vividsolutions.jts.geom.Geometry;
 @Name(OMSVARIOGRAM_NAME)
 @Status(OMSVARIOGRAM_STATUS)
 @License(OMSVARIOGRAM_LICENSE)
-public class OmsVariogramOLD extends JGTModel {
+public class OmsVariogramOLD extends HMModel {
 
     @Description(OMSVARIOGRAM_inStations_DESCRIPTION)
     @In
@@ -176,7 +176,7 @@ public class OmsVariogramOLD extends JGTModel {
                 double zTmp = zStationList.get(i);
                 double hTmp = hStationList.get(i);
                 boolean doubleStation = ModelsEngine.verifyDoubleStation(xStation, yStation, zStation, hStation, xTmp, yTmp,
-                        zTmp, hTmp, i, false, pm);
+                        zTmp, hTmp, i, false);
                 if (!doubleStation) {
                     xStation[i] = xTmp;
                     yStation[i] = yTmp;

@@ -16,7 +16,7 @@
  */
 package leaveOneOut;
 
-import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
+import static org.hortonmachine.gears.libs.modules.HMConstants.isNovalue;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,18 +39,26 @@ import oms3.annotations.Status;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.SchemaException;
-import org.jgrasstools.gears.libs.exceptions.ModelsRuntimeException;
-import org.jgrasstools.gears.libs.modules.JGTModel;
-import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
-import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
-import org.jgrasstools.gears.utils.math.matrixes.ColumnVector;
-import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
+import org.hortonmachine.gears.libs.exceptions.ModelsRuntimeException;
+import org.hortonmachine.gears.libs.modules.HMModel;
+import org.hortonmachine.gears.libs.monitor.IHMProgressMonitor;
+import org.hortonmachine.gears.libs.monitor.LogProgressMonitor;
+import org.hortonmachine.gears.utils.math.matrixes.ColumnVector;
+import org.hortonmachine.hmachine.i18n.HortonMessageHandler;
 import org.opengis.feature.simple.SimpleFeature;
 
 import theoreticalVariogram.TheoreticalVariogram;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
+/*
+ * Niccolò Tubini 28-12-2021
+ * Replaced with lines 40 and 41 
+ * https://sourceforge.net/p/geotools/mailman/message/36652855/
+ */
+//import com.vividsolutions.jts.geom.Coordinate;
+//import com.vividsolutions.jts.geom.Geometry;
+
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 
 import flanagan.analysis.Regression;
 
@@ -64,7 +72,7 @@ import flanagan.analysis.Regression;
 @Status()
 @License("General Public License Version 3 (GPLv3)")
 @SuppressWarnings("nls")
-public class Krigings extends JGTModel {
+public class Krigings extends HMModel {
 
 
 	@Description("The .shp of the measurement point, containing the position of the stations.")
@@ -96,7 +104,7 @@ public class Krigings extends JGTModel {
 
 	@Description("The progress monitor.")
 	@In
-	public IJGTProgressMonitor pm = new LogProgressMonitor();
+	public IHMProgressMonitor pm = new LogProgressMonitor();
 
 
 	@Description("Include zeros in computations (default is true).")
@@ -118,6 +126,9 @@ public class Krigings extends JGTModel {
 	@In
 	public double nugget;
 
+	@Description("Nugget, sill and range for the current time step. The parameters are provided as an OMS time series.")
+    @In
+    public HashMap<Integer, double[]> inParamTS;
 
 	@Description("In the case of kriging with neighbor, maxdist is the maximum distance "
 			+ "within the algorithm has to consider the stations")
@@ -202,6 +213,11 @@ public class Krigings extends JGTModel {
 		double[] result = new double[pointsToInterpolateId2Coordinates.size()];
 		int[] idArray = new int[pointsToInterpolateId2Coordinates.size()];
 
+        if (this.inParamTS != null) {
+            this.nugget = this.inParamTS.get(0)[0];
+            this.sill = this.inParamTS.get(1)[0];
+            this.range = this.inParamTS.get(2)[0];
+        }
 		while (idIterator.hasNext()) {
 			
 			double sum = 0.;

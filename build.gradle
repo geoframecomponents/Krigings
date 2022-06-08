@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-sourceCompatibility = '1.8'
+sourceCompatibility = 11
 
 // to get project version from command line, just type
 // $ gradle -PprojVersion=<version_number> build
@@ -15,10 +15,10 @@ if (project.hasProperty('projVersion')) {
 
 // name with versioning of the jar file
 jar {
-    manifest {
-        attributes 'Implementation-Title' : 'Gradle Quickstart',
-                   'Implementation-Version': version
-    }
+//    manifest {
+//        attributes 'Implementation-Title' : 'Gradle Quickstart',
+//                   'Implementation-Version': version
+//    }
 }
 
 repositories {
@@ -26,7 +26,7 @@ repositories {
     maven {
         // jai_core 1.1.3
         // jai_codec 1.1.3
-        url 'http://download.osgeo.org/webdav/geotools/'
+        url 'https://repo.osgeo.org/repository/release'
     }
 
     maven {
@@ -43,25 +43,25 @@ repositories {
 
 dependencies {
 
-    compile 'org.slf4j:slf4j-api:1.7.21'
-    compile name: 'flanagan'
+    implementation 'org.slf4j:slf4j-api:1.7.21'
 
-    compile group: 'javax.media', name: 'jai_codec', version: '1.1.3'
-    compile group: 'javax.media', name: 'jai_core', version: '1.1.3'
-    compile group: 'javax.media', name: 'jai_imageio', version: '1.1'
+    implementation name: 'flanagan'
+
+    implementation group: 'javax.media', name: 'jai_codec', version: '1.1.3'
+    implementation group: 'javax.media', name: 'jai_core', version: '1.1.3'
+    implementation group: 'javax.media', name: 'jai_imageio', version: '1.1'
     
-    // https://mvnrepository.com/artifact/org.jgrasstools/jgt-grass
-    compile group: 'org.jgrasstools', name: 'jgt-grass', version: '0.7.8'
-    // https://mvnrepository.com/artifact/org.jgrasstools/jgt-hortonmachine
-    compile group: 'org.jgrasstools', name: 'jgt-hortonmachine', version: '0 .7.8'
-    // https://mvnrepository.com/artifact/org.jgrasstools/jgt-jgrassgears
-    compile group: 'org.jgrasstools', name: 'jgt-jgrassgears', version: '0.7.8'
-    // https://mvnrepository.com/artifact/org.jgrasstools/jgt-modules
-    compile group: 'org.jgrasstools', name: 'jgt-modules', version: '0.7.8'
-    // https://mvnrepository.com/artifact/org.jgrasstools/jgt-oms3
-    compile group: 'org.jgrasstools', name: 'jgt-oms3', version: '0.7.8'
-    compile group: 'net.sourceforge.hatbox', name: 'hatbox', version: '1.0.b7'
 
-    testCompile group: 'junit', name: 'junit', version: '4.+'
+    // https://mvnrepository.com/artifact/org.jgrasstools/jgt-hortonmachine
+    implementation group: 'org.hortonmachine', name: 'hm-hmachine', version: '0.10.4'
+    // https://mvnrepository.com/artifact/org.jgrasstools/jgt-jgrassgears
+    implementation group: 'org.hortonmachine', name: 'hm-gears', version: '0.10.4'
+    // https://mvnrepository.com/artifact/org.jgrasstools/jgt-modules
+    implementation group: 'org.hortonmachine', name: 'hm-modules', version: '0.10.4'
+    
+    implementation group: 'net.sourceforge.hatbox', name: 'hatbox', version: '1.0.b7'
+
+        // Use JUnit test framework
+    testImplementation 'junit:junit:4.+'
 
 }

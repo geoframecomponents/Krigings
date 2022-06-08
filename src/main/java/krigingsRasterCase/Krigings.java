@@ -18,8 +18,8 @@
  */
 package krigingsRasterCase;
 
-import static org.jgrasstools.gears.libs.modules.JGTConstants.isNovalue;
-import static org.jgrasstools.gears.libs.modules.JGTConstants.doubleNovalue;
+import static org.hortonmachine.gears.libs.modules.HMConstants.isNovalue;
+import static org.hortonmachine.gears.libs.modules.HMConstants.doubleNovalue;
 
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
@@ -48,14 +48,14 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.DirectPosition2D;
-import org.jgrasstools.gears.libs.exceptions.ModelsRuntimeException;
-import org.jgrasstools.gears.libs.modules.JGTModel;
-import org.jgrasstools.gears.libs.monitor.IJGTProgressMonitor;
-import org.jgrasstools.gears.libs.monitor.LogProgressMonitor;
-import org.jgrasstools.gears.utils.RegionMap;
-import org.jgrasstools.gears.utils.coverage.CoverageUtilities;
-import org.jgrasstools.gears.utils.math.matrixes.ColumnVector;
-import org.jgrasstools.hortonmachine.i18n.HortonMessageHandler;
+import org.hortonmachine.gears.libs.exceptions.ModelsRuntimeException;
+import org.hortonmachine.gears.libs.modules.HMModel;
+import org.hortonmachine.gears.libs.monitor.IHMProgressMonitor;
+import org.hortonmachine.gears.libs.monitor.LogProgressMonitor;
+import org.hortonmachine.gears.utils.RegionMap;
+import org.hortonmachine.gears.utils.coverage.CoverageUtilities;
+import org.hortonmachine.gears.utils.math.matrixes.ColumnVector;
+import org.hortonmachine.hmachine.i18n.HortonMessageHandler;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.MathTransform;
@@ -77,7 +77,7 @@ import krigingsPointCase.StationsSelection;
 @Status()
 @License("General Public License Version 3 (GPLv3)")
 @SuppressWarnings("nls")
-public class Krigings extends JGTModel {
+public class Krigings extends HMModel {
 
 
 	@Description("The .shp of the measurement point, containing the position of the stations.")
@@ -113,7 +113,7 @@ public class Krigings extends JGTModel {
 
 	@Description("The progress monitor.")
 	@In
-	public IJGTProgressMonitor pm = new LogProgressMonitor();
+	public IHMProgressMonitor pm = new LogProgressMonitor();
 
 
 	@Description("Include zeros in computations (default is true).")
@@ -134,7 +134,10 @@ public class Krigings extends JGTModel {
 	@Description("Is the nugget if the models runs with the gaussian variogram.")
 	@In
 	public double nugget;
-
+	
+	@Description("Nugget, sill and range for the current time step. The parameters are provided as an OMS time series.")
+    @In
+    public HashMap<Integer, double[]> inParamTS;
 
 	@Description("In the case of kriging with neighbor, maxdist is the maximum distance "
 			+ "within the algorithm has to consider the stations")
@@ -229,6 +232,11 @@ public class Krigings extends JGTModel {
 		final DirectPosition gridPoint = new DirectPosition2D();
 		MathTransform transf = inInterpolationGrid.getCRSToGrid2D();
 
+        if (this.inParamTS != null) {
+            this.nugget = this.inParamTS.get(0)[0];
+            this.sill = this.inParamTS.get(1)[0];
+            this.range = this.inParamTS.get(2)[0];
+        }
 		while (idIterator.hasNext()) {
 
 			double sum = 0.;
@@ -476,7 +484,7 @@ public class Krigings extends JGTModel {
 		double xres = regionMap.getXres();
 		double yres = regionMap.getYres();
 
-		outWR = CoverageUtilities.createDoubleWritableRaster(cols, rows, null,
+		outWR = CoverageUtilities.createWritableRaster(cols, rows, null,
 				null, null);
 
 		double northing = south;
